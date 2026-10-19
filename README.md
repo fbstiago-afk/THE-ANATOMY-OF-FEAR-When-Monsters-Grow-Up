@@ -1,5 +1,13 @@
 # The Anatomy of Fear — When Monsters Grow Up
 
+<!-- portfolio-link:start -->
+[![View the poster in Power BI](https://img.shields.io/badge/View%20the%20poster-Power%20BI-6C3BAA?style=for-the-badge)](https://app.powerbi.com/view?r=eyJrIjoiMGViN2ZkYmMtOGUwNy00NGFmLTg2YTItNjBiYmY3MTI0MWEyIiwidCI6IjMxYzJjZDk3LWE3MGItNDgwYy1iZTM1LTBhMGRiMzgwZTNlNCJ9)
+[![More projects](https://img.shields.io/badge/More%20projects-bocardidata.com.br-24172F?style=for-the-badge)](https://bocardidata.com.br)
+
+> 🔗 **Live report (Publish to web):** [https://app.powerbi.com/view?r=eyJrIjoiMGViN2…](https://app.powerbi.com/view?r=eyJrIjoiMGViN2ZkYmMtOGUwNy00NGFmLTg2YTItNjBiYmY3MTI0MWEyIiwidCI6IjMxYzJjZDk3LWE3MGItNDgwYy1iZTM1LTBhMGRiMzgwZTNlNCJ9)
+> 📂 **More Power BI projects:** **[bocardidata.com.br](https://bocardidata.com.br)**
+<!-- portfolio-link:end -->
+
 My entry for the **Halloween Data Visualization Contest 2026** (Microsoft Fabric / Power BI Community). One A4 portrait page, built in Power BI, telling how our fears change from childhood to adulthood, using only the 105 responses of the official survey.
 
 > *We outgrew the monsters. Not the fear.*
