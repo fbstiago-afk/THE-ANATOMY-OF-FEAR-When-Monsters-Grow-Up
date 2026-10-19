@@ -1,69 +1,70 @@
 # The Anatomy of Fear — When Monsters Grow Up
 
-Meu pôster para o **Halloween Data Visualization Contest 2026** (Microsoft Fabric / Power BI Community). Uma página A4 em pé, feita em Power BI, contando como os medos mudam entre a infância e a vida adulta — usando só as 105 respostas da pesquisa oficial.
+My entry for the **Halloween Data Visualization Contest 2026** (Microsoft Fabric / Power BI Community). One A4 portrait page, built in Power BI, telling how our fears change from childhood to adulthood, using only the 105 responses of the official survey.
 
 > *We outgrew the monsters. Not the fear.*
 
-## O que tem na pasta
+🇧🇷 [Versão em português](README.pt-BR.md)
 
-- `TheAnatomyOfFear_Submission.pbix` → arquivo que vai para a submissão (o `TheAnatomyOfFear.pbix` é a mesma coisa).
-- `TheAnatomyOfFear.pbip` + pastas `.Report` e `.SemanticModel` → projeto aberto (PBIR + TMDL), que é onde eu trabalho.
-- `Assets/` → fundo (SVG original e JPG exportado), tema, specs do Deneb, HTML/CSS das animações, prévia em PNG.
-- `Documentacao/` → medidas DAX, consulta da tabela Respondent, layout, checklist do concurso e meus scripts de apoio.
-- `STATUS.md` → onde estou e o que falta.
+## What's in the repo
 
-Os arquivos do concurso (starter, CSV, regras, imagens de referência) estão intactos.
+- `TheAnatomyOfFear_Submission.pbix` → the file for submission (`TheAnatomyOfFear.pbix` is identical).
+- `TheAnatomyOfFear.pbip` + `.Report` and `.SemanticModel` folders → the open project (PBIR + TMDL), where I work.
+- `Assets/` → background (SVG and exported JPG), theme, Deneb specs, HTML/CSS for the animations, PNG preview.
+- `Documentacao/` → DAX measures, the `Respondent` query, layout notes, contest checklist and my helper scripts.
+- `survey_responses.csv` → the official dataset, untouched.
+- `STATUS.md` → where I am and what is left (in Portuguese).
 
-## A história
+## The story
 
-Li o pôster de cima para baixo em quatro partes:
+The poster reads top to bottom in four parts:
 
-1. **The monsters changed shape (I–II).** Um gráfico em forma de "coluna vertebral": infância de um lado, hoje do outro. Na infância lideram *Being trapped / small spaces* (14), *Heights* (13), *Snakes* e *The dark* (11). Hoje: *War* (19), *Uncertainty about the future* (14), *Death* (12), *Financial insecurity* (11). Embaixo, três destaques: War 5 → 19, The dark 11 → 2 e Financial insecurity 0 → 11 (ninguém citou quando criança).
-2. **The fears that never left (III).** 45 de 105 pessoas (42,9%) repetiram exatamente o mesmo medo nas duas listas. Cada pessoa vira um fantasminha; os acesos são os que ainda carregam um medo antigo. O mais "fiel" é *Snakes*: 6 dos 11 que tinham esse medo quando crianças continuam com ele.
-3. **Even data has monsters (IV).** O pior pesadelo de quem trabalha com dados: *It arrives a mess*, 23 de 105 (21,9%).
-4. Fecho com *The monsters didn't disappear. They learned to use spreadsheets.*
+1. **The monsters changed shape (I–II).** A "spine" chart: childhood on one side, today on the other. As kids, people feared *Being trapped / small spaces* (14), *Heights* (13), *Snakes* and *The dark* (11). Today: *War* (19), *Uncertainty about the future* (14), *Death* (12), *Financial insecurity* (11). Below it, three highlights: War 5 → 19, The dark 11 → 2 and Financial insecurity 0 → 11 (nobody named it as a child).
+2. **The fears that never left (III).** 45 of 105 people (42.9%) named the exact same fear in both lists. Each person is a little ghost; the lit ones still carry an old fear. The most loyal monster is *Snakes*: 6 of the 11 who feared them as kids still do.
+3. **Even data has monsters (IV).** The worst nightmare for people who work with data: *It arrives a mess*, 23 of 105 (21.9%).
+4. Closing line: *The monsters didn't disappear. They learned to use spreadsheets.*
 
-Alguns cuidados que deixei escritos no próprio pôster: os números são de pessoas, não de seleções; dava para marcar vários medos; é uma amostra voluntária da comunidade, não da população; e as setas ▲▼ comparam totais, não mostram a "trajetória" de cada pessoa.
+A few caveats are written on the poster itself: counts are people, not selections; respondents could pick several fears; it is a voluntary community sample, not the general population; and the ▲▼ arrows compare totals, they don't show each person's trajectory.
 
-## Modelo
+## Model
 
-Aproveitei o modelo do starter inteiro (mesma fonte, mesmo parser de JSON, mesmas tabelas `FactFearSelection`, `DimFear`, `DimAgeGroup`, `DimGender`, `DimCountry`) e acrescentei:
+I kept the whole starter model (same source, same JSON parser, tables `FactFearSelection`, `DimFear`, `DimAgeGroup`, `DimGender`, `DimCountry`) and added:
 
-- tabela **`Respondent`**, uma linha por resposta, com o `dataNightmare` original, rótulos curtos (`Nightmare`, `NightmareDetail`), `AgeGroup`, quantos medos se repetiram (`FearsKept`) e quais (`KeptFears`);
-- relacionamento `Respondent[ResponseKey]` 1 → * `FactFearSelection[ResponseKey]`, direção única;
-- as medidas na pasta **Anatomy of Fear** (detalhes em `Documentacao/DAX_Measures.md`). Nenhum número do pôster está digitado à mão — tudo sai das medidas. Nos rankings deixei de fora *None of these*, *Prefer not to answer* e *Something else*.
+- a **`Respondent`** table, one row per response, with the original `dataNightmare`, short labels (`Nightmare`, `NightmareDetail`), `AgeGroup`, how many fears were kept (`FearsKept`) and which ones (`KeptFears`);
+- a `Respondent[ResponseKey]` 1 → * `FactFearSelection[ResponseKey]` relationship, single direction;
+- measures in the **Anatomy of Fear** folder (see `Documentacao/DAX_Measures.md`). No number on the poster is typed by hand; everything comes from measures. Rankings leave out *None of these*, *Prefer not to answer* and *Something else*.
 
-## Visuais
+## Visuals
 
-- **Deneb (Vega-Lite):** a coluna vertebral dos medos, os 105 fantasmas e o ranking dos pesadelos de dados.
-- **HTML Content:** o fantasma com a vela no topo (decorativo) e o card do pesadelo de dados. O ícone do card é só ilustração: célula vazia = valor faltando, barras repetidas = duplicatas, barras desalinhadas = formatos diferentes.
-- **Nativos:** títulos, textos e números principais ficam em caixas de texto e cartões, que se comportam melhor com leitor de tela.
-- O fundo (moldura gótica, lua, morcegos, teia, skyline) é uma imagem só, sem informação.
+- **Deneb (Vega-Lite):** the fear spine, the 105 ghosts and the data-nightmare ranking.
+- **HTML Content:** the ghost with a candle (decorative) and the data-nightmare card. The card icon is only an illustration: empty cell = missing value, repeated bars = duplicates, misaligned bars = mixed formats.
+- **Native:** titles, text and key numbers are text boxes and cards, which behave better with screen readers.
+- The background (gothic frame, moon, bats, web, skyline) is a single image with no information in it.
 
 ### Tooltips
 
-A regra permite páginas de tooltip para detalhe extra, desde que a história funcione sem elas — então tudo que é essencial está na página principal. Fiz quatro, todas ocultas:
+The contest allows tooltip pages for extra detail as long as the story works without them, so everything essential is on the main page. I made four hidden ones:
 
-| Tooltip | Onde aparece | O que mostra |
+| Tooltip | Shows up on | What it shows |
 |---|---|---|
-| Fear dossier | qualquer medo da coluna vertebral | categoria, pessoas e % na infância e hoje, quantas repetiram, gráfico por faixa etária |
-| Persistence | 42.9%, "45 of 105" e *Most loyal monster* | os medos que mais ficaram e o % que manteve algum medo por faixa etária |
-| Data nightmare | barras dos pesadelos | detalhe da resposta, n e %, % por faixa etária |
-| Ghost case file | cada fantasma | a "ficha" da resposta: medos de infância e de hoje, os repetidos destacados, faixa etária e pesadelo de dados |
+| Fear dossier | any fear in the spine | category, people and % in childhood and today, how many kept it, chart by age group |
+| Persistence | 42.9%, "45 of 105", *Most loyal monster* | the fears that stayed most, and % keeping any fear by age group |
+| Data nightmare | nightmare bars | answer detail, n and %, % by age group |
+| Ghost case file | each ghost | the response "file": childhood and current fears, kept ones highlighted, age group and data nightmare |
 
-Cada tooltip tem uma animaçãozinha em CSS: olhos no escuro e uma aranha descendo; um fantasma espiando atrás da lápide *STILL HERE* e uma vela; uma planilha assombrada e um morcego; e o fantasma flutuando na ficha. São só enfeite e param quando o sistema pede menos movimento.
+Each one has a small CSS animation (eyes in the dark and a spider, a ghost peeking from a tombstone and a candle, a haunted spreadsheet and a bat, a floating ghost on the file). They are decoration only and stop when the system asks for reduced motion.
 
-Não usei bookmarks: não acrescentavam nada à história e complicavam a navegação por teclado.
+I did not use bookmarks: they added nothing to the story and complicated keyboard navigation.
 
-## Acessibilidade
+## Accessibility
 
-- Contraste conferido sobre o fundo `#151020`: textos entre 8:1 e 15,8:1; barras acima de 4:1; a faixa menta acima de 3:1 sobre as barras.
-- Nada depende só de cor: valores escritos, ▲▼, ranks #1–#3, fantasmas cheios × vazados com números.
-- Alt text vem de medidas e descreve o achado, sempre com o total (ex.: "45 of 105 respondents, 42.9%…").
-- Ordem de tabulação segue a leitura; o fantasma decorativo está fora dela.
+- Contrast checked against the `#151020` background: text between 8:1 and 15.8:1; bars above 4:1; the mint band above 3:1 over the bars.
+- Nothing relies on color alone: written values, ▲▼, ranks #1–#3, filled vs hollow ghosts with numbers.
+- Alt text comes from measures and states the finding with its total (e.g. "45 of 105 respondents, 42.9%…").
+- Tab order follows reading order; the decorative ghost is outside it.
 
-## Para abrir
+## Opening it
 
-Abra o `.pbix` direto. Se for atualizar, a fonte é o blob oficial do concurso (acesso anônimo). Visuais do AppSource usados: **Deneb** e **HTML Content** — já vão dentro do PBIX.
+Open the `.pbix` directly. To refresh, the source is the official contest blob (anonymous access). Marketplace visuals used: **Deneb** and **HTML Content**, both embedded in the PBIX.
 
-Os scripts em `Documentacao/scripts` são os que uso para remontar o projeto e o fundo quando mexo no layout (`python Documentacao/scripts/build.py pbip Assets/Background/AnatomyOfFear_Background.jpg`).
+The scripts in `Documentacao/scripts` rebuild the project and the background when I change the layout (`python Documentacao/scripts/build.py pbip Assets/Background/AnatomyOfFear_Background.jpg`).
