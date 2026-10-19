@@ -1,0 +1,43 @@
+<style>
+.gc{font-family:'Segoe UI',sans-serif;color:#F4EBDD;height:100%;box-sizing:border-box;padding:10px 14px 8px;position:relative;overflow:hidden;
+background:radial-gradient(circle at 88% 6%,rgba(189,154,247,.28),rgba(30,20,43,0) 42%),#1E142B}
+.gc .hd{display:flex;gap:12px;align-items:center}
+.gc .gs{flex:0 0 74px;height:86px}
+.gc .gs svg{width:74px;height:86px;animation:gcfloat 3.8s ease-in-out infinite}
+.gc .eye{animation:gcblink 4s infinite;transform-origin:center;transform-box:fill-box}
+.gc .kick{font-size:10px;letter-spacing:1.6px;color:#BD9AF7;font-weight:700}
+.gc .ttl{font-family:Georgia,serif;font-size:21px;line-height:1.15;margin:2px 0}
+.gc .sub{font-size:11px;color:#C9B8E0}
+.gc .cols{display:flex;gap:12px;margin-top:8px}
+.gc .col{flex:1;border-top:1px solid #4A3860;padding-top:5px}
+.gc .h{font-size:10px;font-weight:700;letter-spacing:1.4px;margin-bottom:3px}
+.gc .then{color:#BD9AF7}.gc .now{color:#FFB886}
+.gc ul{list-style:none;margin:0;padding:0}
+.gc li{font-size:12px;line-height:1.5;color:#F4EBDD}
+.gc li.k{color:#151020;background:#B4F2C4;border-radius:4px;padding:0 5px;margin:1px 0;font-weight:700;animation:gcpulse 2.8s ease-in-out infinite}
+.gc li.k:before{content:'\2726  '}
+.gc .lg{margin-top:8px;font-size:11px;color:#B4F2C4;font-style:italic}
+.gc .ft{margin-top:6px;font-size:11px;color:#C9B8E0;border-top:1px dashed #4A3860;padding-top:5px}
+.gc .ft b{color:#FF858E;font-family:Georgia,serif;font-style:italic;font-weight:400;font-size:13px}
+.gc .bat{position:absolute;top:8px;right:-40px;width:34px;animation:gcbat 7s linear infinite}
+.gc .bat .w{animation:gcflap .22s ease-in-out infinite alternate;transform-origin:50% 50%;transform-box:fill-box}
+@keyframes gcfloat{0%,100%{transform:translateY(3px)}50%{transform:translateY(-6px)}}
+@keyframes gcblink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.1)}}
+@keyframes gcpulse{0%,100%{box-shadow:0 0 0 rgba(180,242,196,0)}50%{box-shadow:0 0 10px rgba(180,242,196,.65)}}
+@keyframes gcbat{0%,55%{transform:translate(0,0)}75%{transform:translate(-260px,18px)}100%{transform:translate(-520px,-4px)}}
+@keyframes gcflap{from{transform:scaleY(1)}to{transform:scaleY(.35)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+<div class='gc'>
+<svg class='bat' viewBox='0 0 40 20' aria-hidden='true'><g class='w'><path d='M20 10 C16 4 10 2 2 4 C6 7 7 10 5 14 C9 12 13 12 15 15 C16 12 18 11 20 12 C22 11 24 12 25 15 C27 12 31 12 35 14 C33 10 34 7 38 4 C30 2 24 4 20 10 Z' fill='#BD9AF7'/></g></svg>
+<div class='hd'><div class='gs'><svg viewBox='0 0 74 86' aria-hidden='true'>
+<path d='M10 82 L10 34 C10 6 64 6 64 34 L64 82 L55 74 L46 82 L37 74 L28 82 L19 74 Z' fill='{{_fill}}' stroke='#B4F2C4' stroke-width='2.5' stroke-dasharray='{{_dash}}' style='filter:drop-shadow(0 0 {{_glow}}px #B4F2C4)'/>
+<ellipse class='eye' cx='28' cy='38' rx='5' ry='7' fill='{{_eye}}'/><ellipse class='eye' cx='46' cy='38' rx='5' ry='7' fill='{{_eye}}'/>
+<ellipse cx='37' cy='54' rx='4' ry='5.5' fill='{{_eye}}'/></svg></div>
+<div><div class='kick'>CASE FILE &#183; RESPONSE #{{_rk}}</div>
+<div class='ttl'>{{_title}}</div>
+<div class='sub'>Age group {{_age}} (when answering) &#183; {{_kept}} identical fear(s)</div></div></div>
+<div class='cols'><div class='col'><div class='h then'>&#9664; THEN &#183; AS A CHILD</div><ul>{{_child}}</ul></div>
+<div class='col'><div class='h now'>NOW &#183; TODAY &#9654;</div><ul>{{_now}}</ul></div></div>
+<div class='lg'>{{_explain}}</div>
+<div class='ft'>Worst data nightmare: <b>&#8220;{{_nm}}&#8221;</b></div>
+</div>

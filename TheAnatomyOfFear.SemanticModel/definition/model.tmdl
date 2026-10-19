@@ -1,0 +1,26 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-GB
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["raw_survey_responses","DimFear","DimAgeGroup","DimGender","DimCountry","FactFearSelection","Respondent","_Measures"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table DimFear
+ref table DimAgeGroup
+ref table DimGender
+ref table DimCountry
+ref table FactFearSelection
+ref table Respondent
+ref table _Measures
+ref table 'View By'
+
+ref cultureInfo en-US
+

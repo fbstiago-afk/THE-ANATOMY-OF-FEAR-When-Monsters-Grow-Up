@@ -1,0 +1,137 @@
+/// Distinct fear labels from childhood and adult selections.
+table DimFear
+	lineageTag: 0ae77bba-eeaf-4ecf-af61-21332152741d
+
+	column FearKey
+		dataType: int64
+		isHidden
+		lineageTag: 8381c378-2141-4d60-81fd-1b03f22726bc
+		summarizeBy: none
+		sourceColumn: FearKey
+
+	column Fear
+		dataType: string
+		lineageTag: 81c5d357-a5dd-4c93-a6a2-2e86e7bd9325
+		summarizeBy: none
+		sourceColumn: Fear
+
+	column CategoryOrder
+		dataType: int64
+		isHidden
+		lineageTag: cdcf3f21-6d5b-4903-9032-65d7985a3d5f
+		summarizeBy: none
+		sourceColumn: CategoryOrder
+
+	/// Groups fears using the survey categories. A written-in answer that matches a listed fear uses that fear's category. For example, Something else: War belongs to Separation & Loss. Other Responses covers None of these, Prefer not to answer and other unmatched written-in answers. Original answers are kept unchanged.
+	column Category
+		dataType: string
+		lineageTag: df816d58-bd55-4610-b8ec-7a21c6d8f2a1
+		summarizeBy: none
+		sourceColumn: Category
+		sortByColumn: CategoryOrder
+
+	partition DimFear = m
+		mode: import
+		source =
+				let
+				 Clean = (v as any) as text => if v = null or Text.Trim(Text.From(v)) = "" then "(Unknown)" else Text.Trim(Text.From(v)),
+				 Parse = (v as any) as list => if v = null or Text.Trim(Text.From(v)) = "" then {} else let j = Json.Document(v) in if not Value.Is(j, type list) then error "Fear JSON must be a list" else List.Distinct(List.Select(List.Transform(j, each if _ = null then "" else Text.Trim(Text.From(_))), each _ <> "")),
+				 Values = List.Combine(List.Transform(raw_survey_responses[childhoodFearsJson] & raw_survey_responses[currentFearsJson], each Parse(_))),
+				 Unique = List.Sort(List.Distinct(List.Transform(Values, each Clean(_)))),
+				 Labels = Table.FromList(Unique, Splitter.SplitByNothing(), {"Fear"}),
+				 Keys = Table.AddIndexColumn(Labels, "FearKey", 1, 1, Int64.Type),
+				 // Exact fear categories from the Halloween survey.
+				 CategoryLookup = #table(type table [Fear=text, Category=text, CategoryOrder=Int64.Type], {
+				    {"Bats", "Animals & Insects", 1},
+				    {"Bees/wasps", "Animals & Insects", 1},
+				    {"Birds", "Animals & Insects", 1},
+				    {"Dogs", "Animals & Insects", 1},
+				    {"Insects/bugs in general", "Animals & Insects", 1},
+				    {"Other animals", "Animals & Insects", 1},
+				    {"Rats/mice", "Animals & Insects", 1},
+				    {"Sharks", "Animals & Insects", 1},
+				    {"Snakes", "Animals & Insects", 1},
+				    {"Spiders", "Animals & Insects", 1},
+				    {"Deep/open water", "Nature & Environment", 2},
+				    {"Drowning", "Nature & Environment", 2},
+				    {"Earthquakes", "Nature & Environment", 2},
+				    {"Extreme cold", "Nature & Environment", 2},
+				    {"Fire", "Nature & Environment", 2},
+				    {"Heights", "Nature & Environment", 2},
+				    {"Natural disasters generally", "Nature & Environment", 2},
+				    {"Radioactivity/nuclear disaster", "Nature & Environment", 2},
+				    {"Thunderstorms/lightning", "Nature & Environment", 2},
+				    {"Tornadoes/hurricanes", "Nature & Environment", 2},
+				    {"Abandoned buildings", "Dark, Unknown & Supernatural", 3},
+				    {"Aliens", "Dark, Unknown & Supernatural", 3},
+				    {"Basements / Attics", "Dark, Unknown & Supernatural", 3},
+				    {"Being watched", "Dark, Unknown & Supernatural", 3},
+				    {"Cemeteries", "Dark, Unknown & Supernatural", 3},
+				    {"Clowns", "Dark, Unknown & Supernatural", 3},
+				    {"Demons/the devil", "Dark, Unknown & Supernatural", 3},
+				    {"Dolls/mannequins", "Dark, Unknown & Supernatural", 3},
+				    {"Ghosts", "Dark, Unknown & Supernatural", 3},
+				    {"Monsters under the bed", "Dark, Unknown & Supernatural", 3},
+				    {"The dark", "Dark, Unknown & Supernatural", 3},
+				    {"The unknown/unfamiliar", "Dark, Unknown & Supernatural", 3},
+				    {"Zombies", "Dark, Unknown & Supernatural", 3},
+				    {"Being trapped / small spaces", "Confined & Physical Spaces", 4},
+				    {"Bridges", "Confined & Physical Spaces", 4},
+				    {"Crowded spaces", "Confined & Physical Spaces", 4},
+				    {"Elevators", "Confined & Physical Spaces", 4},
+				    {"Flying", "Confined & Physical Spaces", 4},
+				    {"Open/empty spaces", "Confined & Physical Spaces", 4},
+				    {"Tunnels", "Confined & Physical Spaces", 4},
+				    {"Blood", "Body, Health & Death", 5},
+				    {"Cancer or another serious diagnosis", "Body, Health & Death", 5},
+				    {"Choking", "Body, Health & Death", 5},
+				    {"Death (your own or a loved one’s)", "Body, Health & Death", 5},
+				    {"Dentists", "Body, Health & Death", 5},
+				    {"Disfigurement/scars", "Body, Health & Death", 5},
+				    {"Doctors/hospitals", "Body, Health & Death", 5},
+				    {"Germs/contamination", "Body, Health & Death", 5},
+				    {"Getting sick/illness", "Body, Health & Death", 5},
+				    {"Losing a limb or developing a disability", "Body, Health & Death", 5},
+				    {"Needles/shots", "Body, Health & Death", 5},
+				    {"Being alone / Loneliness", "Social & Emotional", 6},
+				    {"Being disliked", "Social & Emotional", 6},
+				    {"Being judged", "Social & Emotional", 6},
+				    {"Being laughed at", "Social & Emotional", 6},
+				    {"Commitment", "Social & Emotional", 6},
+				    {"Conflict/confrontation", "Social & Emotional", 6},
+				    {"Embarrassment", "Social & Emotional", 6},
+				    {"Public speaking", "Social & Emotional", 6},
+				    {"Rejection", "Social & Emotional", 6},
+				    {"Abandonment", "Separation & Loss", 7},
+				    {"Being forgotten", "Separation & Loss", 7},
+				    {"Divorce/breakup", "Separation & Loss", 7},
+				    {"Getting lost", "Separation & Loss", 7},
+				    {"Intruders/home invasion", "Separation & Loss", 7},
+				    {"Pets dying", "Separation & Loss", 7},
+				    {"Separation from friends or family", "Separation & Loss", 7},
+				    {"War", "Separation & Loss", 7},
+				    {"Failing at work/school", "Performance & Future", 8},
+				    {"Financial insecurity/poverty", "Performance & Future", 8},
+				    {"Job loss", "Performance & Future", 8},
+				    {"Missing deadlines", "Performance & Future", 8},
+				    {"Not being good enough", "Performance & Future", 8},
+				    {"Uncertainty about the future", "Performance & Future", 8},
+				    {"Wasting one’s life/potential", "Performance & Future", 8}
+				 }),
+				 // Match written-in answers such as "Something else: War" to an existing survey fear.
+				 CategoryNames = Table.AddColumn(Keys, "CategoryFear", each
+				    if Text.StartsWith([Fear], "Something else:", Comparer.OrdinalIgnoreCase)
+				    then Text.Trim(Text.AfterDelimiter([Fear], ":")) else [Fear], type text),
+				 Joined = Table.NestedJoin(CategoryNames, {"CategoryFear"}, CategoryLookup, {"Fear"}, "SurveyCategory", JoinKind.LeftOuter),
+				 Expanded = Table.ExpandTableColumn(Joined, "SurveyCategory", {"Category", "CategoryOrder"}),
+				 WithCategory = Table.AddColumn(Expanded, "ResolvedCategory", each
+				    if [Category] <> null then [Category]
+				    else if List.Contains({"None of these", "Prefer not to answer", "Something else", "(Unknown)"}, [Fear]) or Text.StartsWith([Fear], "Something else:") then "Other Responses"
+				    else "Unmapped", type text),
+				 WithOrder = Table.AddColumn(WithCategory, "ResolvedOrder", each
+				    if [CategoryOrder] <> null then [CategoryOrder]
+				    else if [ResolvedCategory] = "Other Responses" then 9 else 99, Int64.Type),
+				 Removed = Table.RemoveColumns(WithOrder, {"Category", "CategoryOrder", "CategoryFear"}),
+				 Result = Table.RenameColumns(Removed, {{"ResolvedCategory","Category"}, {"ResolvedOrder","CategoryOrder"}})
+				in Result
+

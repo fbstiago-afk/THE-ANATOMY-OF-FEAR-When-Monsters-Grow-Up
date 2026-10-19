@@ -1,0 +1,126 @@
+/// One row per survey response. Derived from raw_survey_responses; original values are not modified.
+table Respondent
+	lineageTag: 0e1e698e-5b1b-4c7d-91af-cf55abd94688
+
+	/// Survey response identifier (one row per response).
+	column ResponseKey
+		dataType: int64
+		formatString: 0
+		lineageTag: 7b77c2a5-7661-4ebb-a2d1-833573242b21
+		summarizeBy: none
+		sourceColumn: ResponseKey
+
+		annotation SummarizationSetBy = User
+
+	/// Original, unmodified answer to the data nightmare question.
+	column dataNightmare
+		dataType: string
+		lineageTag: 6c5809a0-962d-4613-8f2e-92034ef44978
+		summarizeBy: none
+		sourceColumn: dataNightmare
+
+		annotation SummarizationSetBy = User
+
+	/// Short label: text of dataNightmare before the bracket. Derived, for display.
+	column Nightmare
+		dataType: string
+		lineageTag: d60b61fd-5d37-4458-9a37-9daf41753f2e
+		summarizeBy: none
+		sourceColumn: Nightmare
+
+		annotation SummarizationSetBy = User
+
+	/// Text inside the bracket of dataNightmare. Derived, for display.
+	column NightmareDetail
+		dataType: string
+		lineageTag: 568efd23-2c8b-44a6-999d-0ed63cf59ad0
+		summarizeBy: none
+		sourceColumn: NightmareDetail
+
+		annotation SummarizationSetBy = User
+
+	/// Number of identical fears in the childhood and current lists of this response.
+	column FearsKept
+		dataType: int64
+		formatString: 0
+		lineageTag: a02d731e-294d-42c2-8155-dbb4d6247db3
+		summarizeBy: none
+		sourceColumn: FearsKept
+
+		annotation SummarizationSetBy = User
+
+	/// Number of distinct fears in the childhood list.
+	column ChildhoodFearCount
+		dataType: int64
+		formatString: 0
+		lineageTag: 7beecb45-475e-4df1-a800-cc884ac6e6fe
+		summarizeBy: none
+		sourceColumn: ChildhoodFearCount
+
+		annotation SummarizationSetBy = User
+
+	/// Number of distinct fears in the current list.
+	column CurrentFearCount
+		dataType: int64
+		formatString: 0
+		lineageTag: c57a3d56-b8be-438d-8be0-4c40c863fd84
+		summarizeBy: none
+		sourceColumn: CurrentFearCount
+
+		annotation SummarizationSetBy = User
+
+	/// Display order for the 105-ghost chart: most identical fears first, then ResponseKey.
+	column PersonOrder
+		dataType: int64
+		formatString: 0
+		lineageTag: 1949c83a-df81-434d-92da-4708c4369278
+		summarizeBy: none
+		sourceColumn: PersonOrder
+
+		annotation SummarizationSetBy = User
+
+	/// Age group when answering the survey (not childhood age).
+	column AgeGroup
+		dataType: string
+		lineageTag: 6be9f37e-4a42-411f-b960-6360bf7cc388
+		summarizeBy: none
+		sourceColumn: AgeGroup
+
+		annotation SummarizationSetBy = User
+
+	/// The identical fears of this response, comma separated ("none" if none). Derived, for tooltips.
+	column KeptFears
+		dataType: string
+		lineageTag: e15e442a-195c-4ef6-811f-9a344e3532cd
+		summarizeBy: none
+		sourceColumn: KeptFears
+
+		annotation SummarizationSetBy = User
+
+	partition Respondent = m
+		mode: import
+		source =
+				let
+				    // Same parser as the starter tables: JSON array -> distinct trimmed list (never split on commas).
+				    Parse = (v as any) as list => if v = null or Text.Trim(Text.From(v)) = "" then {} else let j = Json.Document(v) in if not Value.Is(j, type list) then error "Fear JSON must be a list" else List.Distinct(List.Select(List.Transform(j, each if _ = null then "" else Text.Trim(Text.From(_))), each _ <> "")),
+				    Clean = (v as any) as text => if v = null or Text.Trim(Text.From(v)) = "" then "(Unknown)" else Text.Trim(Text.From(v)),
+				    Source = raw_survey_responses,
+				    Checked = if Table.RowCount(Source) <> List.Count(List.Distinct(Source[ResponseKey])) then error "ResponseKey must be unique" else Source,
+				    WithLists = Table.AddColumn(Checked, "Lists", each [C = Parse([childhoodFearsJson]), N = Parse([currentFearsJson])]),
+				    WithKept = Table.AddColumn(WithLists, "FearsKept", each List.Count(List.Intersect({[Lists][C], [Lists][N]})), Int64.Type),
+				    WithKeptList = Table.AddColumn(WithKept, "KeptFears", each let k = List.Intersect({[Lists][C], [Lists][N]}) in if List.IsEmpty(k) then "none" else Text.Combine(k, ", "), type text),
+				    WithAge = Table.AddColumn(WithKeptList, "AgeGroup", each Clean([ageGroup]), type text),
+				    WithChildCount = Table.AddColumn(WithAge, "ChildhoodFearCount", each List.Count([Lists][C]), Int64.Type),
+				    WithNowCount = Table.AddColumn(WithChildCount, "CurrentFearCount", each List.Count([Lists][N]), Int64.Type),
+				    // Derived display labels. The original answer stays untouched in dataNightmare.
+				    WithShort = Table.AddColumn(WithNowCount, "Nightmare", each let t = Clean([dataNightmare]) in if Text.Contains(t, " (") then Text.Trim(Text.BeforeDelimiter(t, " (")) else t, type text),
+				    WithDetail = Table.AddColumn(WithShort, "NightmareDetail", each let t = Clean([dataNightmare]) in if Text.Contains(t, " (") then Text.Trim(Text.BeforeDelimiter(Text.AfterDelimiter(t, " ("), ")", {0, RelativePosition.FromEnd})) else "", type text),
+				    Sorted = Table.Sort(WithDetail, {{"FearsKept", Order.Descending}, {"ResponseKey", Order.Ascending}}),
+				    Indexed = Table.AddIndexColumn(Sorted, "PersonOrder", 1, 1, Int64.Type),
+				    Result = Table.SelectColumns(Indexed, {"ResponseKey", "dataNightmare", "Nightmare", "NightmareDetail", "AgeGroup", "FearsKept", "KeptFears", "ChildhoodFearCount", "CurrentFearCount", "PersonOrder"}),
+				    Typed = Table.TransformColumnTypes(Result, {{"ResponseKey", Int64.Type}, {"dataNightmare", type text}})
+				in
+				    Typed
+
+	annotation PBI_ResultType = Table
+

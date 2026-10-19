@@ -1,0 +1,14 @@
+/// Original survey source retained for refresh and existing report bindings. No respondent dimension is created.
+expression raw_survey_responses =
+		let
+		    Source = Csv.Document(AzureStorage.BlobContents("https://pgstoragekarin.blob.core.windows.net/contests/halloween2026/survey_responses.csv"),[Delimiter=",", Columns=10, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+		    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"ResponseKey", Int64.Type}, {"ageGroup", type text}, {"childhoodFearsJson", type text}, {"countryChildhood", type text}, {"countryNow", type text}, {"currentFearsJson", type text}, {"dataNightmare", type text}, {"fabricToolsJson", type text}, {"gender", type text}})
+		in
+		    Table.RemoveColumns(#"Changed Type", {"submittedAt"})
+	lineageTag: 0be3f224-ba7b-40a9-87cc-c65e375170fc
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

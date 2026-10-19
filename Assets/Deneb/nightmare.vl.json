@@ -1,0 +1,148 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "DATA NIGHTMARES - respondents choosing each answer to the single-choice data nightmare question. The most chosen answer is highlighted. Values from the Power BI model.",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
+  "padding": {
+    "left": 2,
+    "right": 6,
+    "top": 2,
+    "bottom": 2
+  },
+  "background": "transparent",
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI"
+  },
+  "transform": [
+    {
+      "joinaggregate": [
+        {
+          "op": "max",
+          "field": "Responses",
+          "as": "MX"
+        }
+      ]
+    },
+    {
+      "calculate": "datum.Responses + '  ·  ' + format(datum['Nightmare Share'], '.1%')",
+      "as": "lbl"
+    },
+    {
+      "calculate": "datum['Nightmare Rank'] == 1",
+      "as": "isTop"
+    },
+    {
+      "calculate": "datum.MX*1.32",
+      "as": "pad"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "Nightmare",
+      "type": "nominal",
+      "sort": {
+        "field": "Responses",
+        "order": "descending"
+      },
+      "scale": {
+        "paddingInner": 0.28
+      },
+      "axis": {
+        "title": null,
+        "domain": false,
+        "ticks": false,
+        "labelColor": "#F4EBDD",
+        "labelFontSize": 14,
+        "labelPadding": 10,
+        "labelLimit": 330,
+        "labelFontWeight": {
+          "condition": {
+            "test": "datum.index == 0",
+            "value": 700
+          },
+          "value": 400
+        }
+      }
+    },
+    "x": {
+      "field": "Responses",
+      "type": "quantitative",
+      "axis": null,
+      "scale": {
+        "zero": true,
+        "nice": false
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "opacity": 0
+      },
+      "encoding": {
+        "x": {
+          "field": "pad",
+          "type": "quantitative"
+        },
+        "y": null
+      }
+    },
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadiusEnd": 3
+      },
+      "encoding": {
+        "color": {
+          "condition": {
+            "test": "datum.isTop",
+            "value": "#FF858E"
+          },
+          "value": "#8463BF"
+        },
+        "tooltip": [
+          {
+            "field": "Nightmare",
+            "title": "Data nightmare"
+          },
+          {
+            "field": "Responses",
+            "title": "Respondents"
+          },
+          {
+            "field": "Nightmare Share",
+            "title": "Share of respondents",
+            "format": ".1%"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 8,
+        "fontSize": 14,
+        "fontWeight": 600,
+        "color": "#F4EBDD"
+      },
+      "encoding": {
+        "text": {
+          "field": "lbl"
+        }
+      }
+    }
+  ]
+}

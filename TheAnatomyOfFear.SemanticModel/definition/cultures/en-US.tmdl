@@ -1,0 +1,25 @@
+cultureInfo en-US
+
+	linguisticMetadata =
+			{
+			  "Version": "1.0.0",
+			  "Language": "en-US",
+			  "Entities": {
+			    "dimcountry.country": {
+			      "Binding": {
+			        "ConceptualEntity": "DimCountry",
+			        "ConceptualProperty": "Country"
+			      },
+			      "State": "Generated"
+			    },
+			    "dimgender.gender": {
+			      "Binding": {
+			        "ConceptualEntity": "DimGender",
+			        "ConceptualProperty": "Gender"
+			      },
+			      "State": "Generated"
+			    }
+			  }
+			}
+		contentType: json
+

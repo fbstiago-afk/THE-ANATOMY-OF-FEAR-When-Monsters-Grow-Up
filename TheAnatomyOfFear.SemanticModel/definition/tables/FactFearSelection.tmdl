@@ -1,0 +1,88 @@
+/// One row per response, distinct fear and life stage. ResponseKey identifies submissions without a respondent dimension. Country follows life stage; age group refers to the respondent at submission. Both stages indicates selection in both lists, not continuous fear. Empty lists create no selection rows.
+table FactFearSelection
+	lineageTag: 4069a3f0-d669-4bc4-aaeb-079232294ea6
+
+	column ResponseKey
+		dataType: int64
+		isHidden
+		lineageTag: eaf31949-9701-41f8-b03f-f86b25369788
+		summarizeBy: none
+		sourceColumn: ResponseKey
+
+	column FearKey
+		dataType: int64
+		isHidden
+		lineageTag: 9dcdf9b1-473b-41bd-8550-c1b091540465
+		summarizeBy: none
+		sourceColumn: FearKey
+
+	column AgeGroupKey
+		dataType: int64
+		isHidden
+		lineageTag: 2154cf8a-399f-4a4f-8445-ac413c67d243
+		summarizeBy: none
+		sourceColumn: AgeGroupKey
+
+	column GenderKey
+		dataType: int64
+		isHidden
+		lineageTag: bc1d5d34-1dc0-4e7d-954f-814b5e6dc65c
+		summarizeBy: none
+		sourceColumn: GenderKey
+
+	column CountryKey
+		dataType: int64
+		isHidden
+		lineageTag: 6bd80ae3-39ee-4b15-88d2-d80cd92c97f2
+		summarizeBy: none
+		sourceColumn: CountryKey
+
+	column LifeStage
+		dataType: string
+		lineageTag: 611fb721-569a-44da-86b1-2174296d4481
+		sourceColumn: LifeStage
+
+	/// Both stages, Childhood only, or Adult only based on the two selection lists. Does not imply onset, resolution, or replacement.
+	column FearPattern
+		dataType: string
+		lineageTag: c3f46797-66e8-4416-a2ed-ad15dc35126b
+		sourceColumn: FearPattern
+
+	/// True when this response selected the same fear in childhood and adulthood. Stored on both stage rows; count distinct response-fear pairs for retained totals.
+	column IsRetained
+		dataType: boolean
+		lineageTag: a26f9641-b10d-49b8-a14d-01daaa050482
+		sourceColumn: IsRetained
+
+	partition FactFearSelection = m
+		mode: import
+		source =
+				let
+				 Clean = (v as any) as text => if v = null or Text.Trim(Text.From(v)) = "" then "(Unknown)" else Text.Trim(Text.From(v)),
+				 Parse = (v as any) as list => if v = null or Text.Trim(Text.From(v)) = "" then {} else let j = Json.Document(v) in if not Value.Is(j, type list) then error "Fear JSON must be a list" else List.Distinct(List.Select(List.Transform(j, each if _ = null then "" else Text.Trim(Text.From(_))), each _ <> "")),
+				 Source = raw_survey_responses,
+				 Checked = if Table.RowCount(Source) <> List.Count(List.Distinct(Source[ResponseKey])) or List.Contains(Source[ResponseKey], null) then error "ResponseKey must be unique and non-null" else Source,
+				 Records = List.Combine(List.Transform(Table.ToRecords(Checked), (r) =>
+				 let
+				 Childhood = Parse(r[childhoodFearsJson]), Adult = Parse(r[currentFearsJson]),
+				 Common = List.Intersect({Childhood, Adult}),
+				 Stage = (fears as list, stage as text, country as any) as list =>
+				 List.Transform(fears, (fear) => [
+				 ResponseKey = r[ResponseKey], Fear = fear, AgeGroup = Clean(r[ageGroup]), Gender = Clean(r[gender]),
+				 Country = Clean(country), LifeStage = stage,
+				 IsRetained = List.Contains(Common, fear),
+				 FearPattern = if List.Contains(Common, fear) then "Both stages" else if stage = "Childhood" then "Childhood only" else "Adult only"
+				 ])
+				 in Stage(Childhood, "Childhood", r[countryChildhood]) & Stage(Adult, "Adult", r[countryNow]))),
+				 Expanded = Table.FromRecords(Records, type table [ResponseKey=Int64.Type, Fear=text, AgeGroup=text, Gender=text, Country=text, LifeStage=text, IsRetained=logical, FearPattern=text]),
+				 FearJoin = Table.NestedJoin(Expanded, {"Fear"}, DimFear, {"Fear"}, "FearDim", JoinKind.LeftOuter),
+				 FearKeys = Table.ExpandTableColumn(FearJoin, "FearDim", {"FearKey"}),
+				 AgeJoin = Table.NestedJoin(FearKeys, {"AgeGroup"}, DimAgeGroup, {"AgeGroup"}, "AgeDim", JoinKind.LeftOuter),
+				 AgeKeys = Table.ExpandTableColumn(AgeJoin, "AgeDim", {"AgeGroupKey"}),
+				 GenderJoin = Table.NestedJoin(AgeKeys, {"Gender"}, DimGender, {"Gender"}, "GenderDim", JoinKind.LeftOuter),
+				 GenderKeys = Table.ExpandTableColumn(GenderJoin, "GenderDim", {"GenderKey"}),
+				 CountryJoin = Table.NestedJoin(GenderKeys, {"Country"}, DimCountry, {"Country"}, "CountryDim", JoinKind.LeftOuter),
+				 CountryKeys = Table.ExpandTableColumn(CountryJoin, "CountryDim", {"CountryKey"}),
+				 Result = Table.SelectColumns(CountryKeys, {"ResponseKey","FearKey","AgeGroupKey","GenderKey","CountryKey","LifeStage","IsRetained","FearPattern"})
+				in Result
+

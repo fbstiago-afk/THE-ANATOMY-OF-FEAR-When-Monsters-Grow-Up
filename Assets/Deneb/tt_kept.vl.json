@@ -1,0 +1,148 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Tooltip: fears named in both lists by the same respondents (top 7), with how many of the childhood respondents kept them.",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
+  "padding": {
+    "left": 2,
+    "right": 8,
+    "top": 2,
+    "bottom": 2
+  },
+  "background": "transparent",
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI"
+  },
+  "transform": [
+    {
+      "filter": "datum['Kept Respondents'] > 0"
+    },
+    {
+      "window": [
+        {
+          "op": "row_number",
+          "as": "rk"
+        }
+      ],
+      "sort": [
+        {
+          "field": "Kept Respondents",
+          "order": "descending"
+        },
+        {
+          "field": "Childhood Respondents",
+          "order": "ascending"
+        },
+        {
+          "field": "Fear",
+          "order": "ascending"
+        }
+      ]
+    },
+    {
+      "filter": "datum.rk <= 7"
+    },
+    {
+      "calculate": "datum['Kept Respondents'] + ' of ' + datum['Childhood Respondents']",
+      "as": "lbl"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "max",
+          "field": "Kept Respondents",
+          "as": "mx"
+        }
+      ]
+    },
+    {
+      "calculate": "datum.mx * 1.45",
+      "as": "pad"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "Fear",
+      "type": "nominal",
+      "sort": {
+        "field": "rk",
+        "order": "ascending"
+      },
+      "axis": {
+        "title": null,
+        "domain": false,
+        "ticks": false,
+        "labelColor": "#F4EBDD",
+        "labelFontSize": 12,
+        "labelLimit": 210,
+        "labelPadding": 6
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "opacity": 0
+      },
+      "encoding": {
+        "x": {
+          "field": "pad",
+          "type": "quantitative",
+          "axis": null,
+          "scale": {
+            "zero": true,
+            "nice": false
+          }
+        },
+        "y": null
+      }
+    },
+    {
+      "mark": {
+        "type": "bar",
+        "color": "#B4F2C4",
+        "cornerRadiusEnd": 2,
+        "height": {
+          "band": 0.7
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "Kept Respondents",
+          "type": "quantitative"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 5,
+        "fontSize": 11.5,
+        "fontWeight": 600,
+        "color": "#F4EBDD"
+      },
+      "encoding": {
+        "x": {
+          "field": "Kept Respondents",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "lbl"
+        }
+      }
+    }
+  ]
+}

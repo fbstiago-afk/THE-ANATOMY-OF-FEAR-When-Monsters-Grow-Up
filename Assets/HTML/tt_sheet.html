@@ -1,0 +1,18 @@
+<style>
+.hs{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.hs svg{width:94%;height:auto}
+.hs .lid{animation:hsopen 3.6s infinite;transform-origin:center;transform-box:fill-box}
+.hs .pu{animation:hslook 3.6s ease-in-out infinite}
+.hs .rowshake{animation:hsshake 2.4s infinite}
+@keyframes hsopen{0%,25%{transform:scaleY(.08)}35%,80%{transform:scaleY(1)}90%,100%{transform:scaleY(.08)}}
+@keyframes hslook{0%,40%{transform:translateX(0)}55%{transform:translateX(-2px)}70%{transform:translateX(2px)}100%{transform:translateX(0)}}
+@keyframes hsshake{0%,88%,100%{transform:translateX(0)}91%{transform:translateX(-2px)}94%{transform:translateX(2px)}97%{transform:translateX(-1px)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+<div class='hs'><svg viewBox='0 0 80 60' aria-hidden='true' focusable='false'>
+<rect x='4' y='6' width='72' height='50' rx='4' fill='#151020' stroke='#BD9AF7' stroke-width='1.6'/>
+<rect x='4' y='6' width='72' height='11' rx='4' fill='#FF858E'/>
+<g stroke='#5A4775' stroke-width='1'><line x1='4' y1='30' x2='76' y2='30'/><line x1='4' y1='43' x2='76' y2='43'/><line x1='28' y1='17' x2='28' y2='56'/><line x1='52' y1='17' x2='52' y2='56'/></g>
+<g class='rowshake'><rect x='9' y='21' width='14' height='5' rx='2' fill='#F4EBDD'/><rect x='57' y='21' width='14' height='5' rx='2' fill='#F4EBDD'/></g>
+<g class='lid'><ellipse cx='40' cy='23.5' rx='9' ry='5' fill='#FFE7C2'/><circle class='pu' cx='40' cy='23.5' r='2.6' fill='#151020'/></g>
+<rect x='9' y='34' width='14' height='5' rx='2' fill='#B4F2C4'/><rect x='33' y='34' width='14' height='5' rx='2' fill='#B4F2C4'/><rect x='57' y='34' width='14' height='5' rx='2' fill='#B4F2C4' opacity='.5'/>
+<rect x='9' y='47' width='7' height='5' rx='2' fill='#FFB886'/><rect x='40' y='47' width='7' height='5' rx='2' fill='#FFB886'/><circle cx='61' cy='49.5' r='1.6' fill='#FFB886'/><circle cx='66' cy='49.5' r='1.6' fill='#FFB886'/></svg></div>

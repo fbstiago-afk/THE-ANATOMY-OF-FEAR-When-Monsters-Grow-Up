@@ -1,0 +1,26 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Tooltip: by age group (age when answering), share of respondents (left measure) with count of group (label).",
+  "data": {"name": "dataset"},
+  "width": "container", "height": "container",
+  "autosize": {"type": "fit", "contains": "padding"},
+  "padding": {"left": 2, "right": 8, "top": 2, "bottom": 2},
+  "background": "transparent",
+  "config": {"view": {"stroke": null}, "font": "Segoe UI"},
+  "params": [{"name": "barColor", "value": "#B4F2C4"}],
+  "transform": [
+    {"calculate": "datum['TT Group Count'] ? datum['TT Group Count'] : 0", "as": "k"},
+    {"calculate": "datum['TT Group Size'] ? datum['TT Group Size'] : 0", "as": "g"},
+    {"calculate": "datum.g > 0 ? datum.k / datum.g : 0", "as": "share"},
+    {"calculate": "format(datum.share, '.0%') + '  ·  ' + datum.k + ' of ' + datum.g", "as": "lbl"}
+  ],
+  "encoding": {
+    "y": {"field": "AgeGroup", "type": "ordinal", "sort": "ascending", "axis": {"title": null, "domain": false, "ticks": false, "labelColor": "#F4EBDD", "labelFontSize": 12, "labelPadding": 6}}
+  },
+  "layer": [
+    {"mark": {"type": "bar", "color": {"expr": "barColor"}, "cornerRadiusEnd": 2, "height": {"band": 0.7}},
+     "encoding": {"x": {"field": "share", "type": "quantitative", "axis": null, "scale": {"domain": [0, 1.45], "nice": false}}}},
+    {"mark": {"type": "text", "align": "left", "baseline": "middle", "dx": 5, "fontSize": 11.5, "fontWeight": 600, "color": "#F4EBDD"},
+     "encoding": {"x": {"field": "share", "type": "quantitative"}, "text": {"field": "lbl"}}}
+  ]
+}

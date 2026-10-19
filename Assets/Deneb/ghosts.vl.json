@@ -1,0 +1,402 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "105 GHOSTS - one symbol per respondent. Filled mint ghosts named at least one identical fear in childhood and today; the number inside shows how many identical fears when more than one. Hollow ghosts named none. Ordered by number of identical fears.",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
+  "padding": 2,
+  "background": "transparent",
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI"
+  },
+  "params": [
+    {
+      "name": "cols",
+      "value": 21
+    },
+    {
+      "name": "ghost",
+      "value": "M-0.62,0.95 L-0.62,-0.25 C-0.62,-1.05 0.62,-1.05 0.62,-0.25 L0.62,0.95 L0.41,0.72 L0.21,0.95 L0,0.72 L-0.21,0.95 L-0.41,0.72 Z"
+    },
+    {
+      "name": "eyes",
+      "value": "M-0.32,-0.42 L-0.12,-0.42 L-0.12,-0.12 L-0.32,-0.12 Z M0.12,-0.42 L0.32,-0.42 L0.32,-0.12 L0.12,-0.12 Z"
+    }
+  ],
+  "transform": [
+    {
+      "calculate": "(datum.PersonOrder - 1) % cols",
+      "as": "col"
+    },
+    {
+      "calculate": "floor((datum.PersonOrder - 1) / cols)",
+      "as": "row"
+    },
+    {
+      "calculate": "datum.FearsKept > 0 ? 'kept' : 'none'",
+      "as": "band"
+    }
+  ],
+  "layer": [
+    {
+      "encoding": {
+        "x": {
+          "field": "col",
+          "type": "quantitative",
+          "axis": null,
+          "scale": {
+            "domain": [
+              -0.6,
+              20.6
+            ],
+            "nice": false,
+            "zero": false
+          }
+        },
+        "y": {
+          "field": "row",
+          "type": "quantitative",
+          "axis": null,
+          "scale": {
+            "domain": [
+              -0.65,
+              6.85
+            ],
+            "nice": false,
+            "zero": false,
+            "reverse": true
+          }
+        }
+      },
+      "layer": [
+        {
+          "transform": [
+            {
+              "filter": "datum.FearsKept == 0"
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "shape": {
+              "expr": "ghost"
+            },
+            "filled": false,
+            "stroke": "#9A86B5",
+            "strokeWidth": 1.6,
+            "size": 620,
+            "opacity": 1
+          },
+          "encoding": {
+            "tooltip": [
+              {
+                "field": "FearsKept",
+                "title": "Identical fears in both lists"
+              },
+              {
+                "field": "KeptFears",
+                "title": "Which ones"
+              }
+            ]
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum.FearsKept > 0"
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "shape": {
+              "expr": "ghost"
+            },
+            "filled": true,
+            "fill": "#B4F2C4",
+            "opacity": 1,
+            "size": 620
+          },
+          "encoding": {
+            "tooltip": [
+              {
+                "field": "FearsKept",
+                "title": "Identical fears in both lists"
+              },
+              {
+                "field": "KeptFears",
+                "title": "Which ones"
+              }
+            ]
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum.FearsKept == 1"
+            }
+          ],
+          "mark": {
+            "type": "point",
+            "shape": {
+              "expr": "eyes"
+            },
+            "filled": true,
+            "fill": "#151020",
+            "size": 620,
+            "strokeWidth": 0,
+            "opacity": 1
+          }
+        },
+        {
+          "transform": [
+            {
+              "filter": "datum.FearsKept > 1"
+            }
+          ],
+          "mark": {
+            "type": "text",
+            "fontSize": 14,
+            "fontWeight": 700,
+            "color": "#151020",
+            "baseline": "middle",
+            "dy": 1
+          },
+          "encoding": {
+            "text": {
+              "field": "FearsKept"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "transform": [
+        {
+          "calculate": "datum.FearsKept == 1 ? 1 : 0",
+          "as": "k1"
+        },
+        {
+          "calculate": "datum.FearsKept == 2 ? 1 : 0",
+          "as": "k2"
+        },
+        {
+          "calculate": "datum.FearsKept == 3 ? 1 : 0",
+          "as": "k3"
+        },
+        {
+          "calculate": "datum.FearsKept == 0 ? 1 : 0",
+          "as": "k0"
+        },
+        {
+          "aggregate": [
+            {
+              "op": "sum",
+              "field": "k1",
+              "as": "n1"
+            },
+            {
+              "op": "sum",
+              "field": "k2",
+              "as": "n2"
+            },
+            {
+              "op": "sum",
+              "field": "k3",
+              "as": "n3"
+            },
+            {
+              "op": "sum",
+              "field": "k0",
+              "as": "n0"
+            }
+          ]
+        },
+        {
+          "calculate": "'= kept at least one identical fear:  ' + datum.n1 + ' kept one  ·  ' + datum.n2 + ' kept two  ·  ' + datum.n3 + ' kept three'",
+          "as": "t1"
+        },
+        {
+          "calculate": "'= no identical fear  (' + datum.n0 + ')'",
+          "as": "t0"
+        }
+      ],
+      "layer": [
+        {
+          "mark": {
+            "type": "point",
+            "shape": {
+              "expr": "ghost"
+            },
+            "filled": true,
+            "fill": "#B4F2C4",
+            "size": 300,
+            "opacity": 1
+          },
+          "encoding": {
+            "x": {
+              "datum": 0,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.6,
+                  20.6
+                ],
+                "nice": false,
+                "zero": false
+              },
+              "axis": null
+            },
+            "y": {
+              "datum": 5.55,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.65,
+                  6.85
+                ],
+                "nice": false,
+                "zero": false,
+                "reverse": true
+              },
+              "axis": null
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "dx": 14,
+            "fontSize": 14,
+            "color": "#F4EBDD"
+          },
+          "encoding": {
+            "x": {
+              "datum": 0,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.6,
+                  20.6
+                ],
+                "nice": false,
+                "zero": false
+              },
+              "axis": null
+            },
+            "y": {
+              "datum": 5.55,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.65,
+                  6.85
+                ],
+                "nice": false,
+                "zero": false,
+                "reverse": true
+              },
+              "axis": null
+            },
+            "text": {
+              "field": "t1"
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "point",
+            "shape": {
+              "expr": "ghost"
+            },
+            "filled": false,
+            "stroke": "#9A86B5",
+            "strokeWidth": 1.5,
+            "size": 300,
+            "opacity": 1
+          },
+          "encoding": {
+            "x": {
+              "datum": 0,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.6,
+                  20.6
+                ],
+                "nice": false,
+                "zero": false
+              },
+              "axis": null
+            },
+            "y": {
+              "datum": 6.35,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.65,
+                  6.85
+                ],
+                "nice": false,
+                "zero": false,
+                "reverse": true
+              },
+              "axis": null
+            }
+          }
+        },
+        {
+          "mark": {
+            "type": "text",
+            "align": "left",
+            "baseline": "middle",
+            "dx": 14,
+            "fontSize": 14,
+            "color": "#F4EBDD"
+          },
+          "encoding": {
+            "x": {
+              "datum": 0,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.6,
+                  20.6
+                ],
+                "nice": false,
+                "zero": false
+              },
+              "axis": null
+            },
+            "y": {
+              "datum": 6.35,
+              "type": "quantitative",
+              "scale": {
+                "domain": [
+                  -0.65,
+                  6.85
+                ],
+                "nice": false,
+                "zero": false,
+                "reverse": true
+              },
+              "axis": null
+            },
+            "text": {
+              "field": "t0"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

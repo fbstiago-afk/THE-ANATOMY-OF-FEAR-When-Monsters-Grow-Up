@@ -1,0 +1,411 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
+  "name": "6ccfc0031bdaecb11182",
+  "position": {
+    "x": 500,
+    "y": 1300,
+    "z": 21000,
+    "height": 206,
+    "width": 800,
+    "tabOrder": 21000
+  },
+  "visual": {
+    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "query": {
+      "queryState": {
+        "dataset": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Respondent"
+                    }
+                  },
+                  "Property": "ResponseKey"
+                }
+              },
+              "queryRef": "Respondent.ResponseKey",
+              "nativeQueryRef": "ResponseKey"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Respondent"
+                    }
+                  },
+                  "Property": "FearsKept"
+                }
+              },
+              "queryRef": "Respondent.FearsKept",
+              "nativeQueryRef": "FearsKept"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Respondent"
+                    }
+                  },
+                  "Property": "PersonOrder"
+                }
+              },
+              "queryRef": "Respondent.PersonOrder",
+              "nativeQueryRef": "PersonOrder"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Respondent"
+                    }
+                  },
+                  "Property": "KeptFears"
+                }
+              },
+              "queryRef": "Respondent.KeptFears",
+              "nativeQueryRef": "KeptFears"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "vega": [
+        {
+          "properties": {
+            "provider": {
+              "expr": {
+                "Literal": {
+                  "Value": "'vegaLite'"
+                }
+              }
+            },
+            "jsonSpec": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n  \"description\": \"105 GHOSTS - one symbol per respondent. Filled mint ghosts named at least one identical fear in childhood and today; the number inside shows how many identical fears when more than one. Hollow ghosts named none. Ordered by number of identical fears.\",\n  \"data\": {\n    \"name\": \"dataset\"\n  },\n  \"width\": \"container\",\n  \"height\": \"container\",\n  \"autosize\": {\n    \"type\": \"fit\",\n    \"contains\": \"padding\"\n  },\n  \"padding\": 2,\n  \"background\": \"transparent\",\n  \"config\": {\n    \"view\": {\n      \"stroke\": null\n    },\n    \"font\": \"Segoe UI\"\n  },\n  \"params\": [\n    {\n      \"name\": \"cols\",\n      \"value\": 21\n    },\n    {\n      \"name\": \"ghost\",\n      \"value\": \"M-0.62,0.95 L-0.62,-0.25 C-0.62,-1.05 0.62,-1.05 0.62,-0.25 L0.62,0.95 L0.41,0.72 L0.21,0.95 L0,0.72 L-0.21,0.95 L-0.41,0.72 Z\"\n    },\n    {\n      \"name\": \"eyes\",\n      \"value\": \"M-0.32,-0.42 L-0.12,-0.42 L-0.12,-0.12 L-0.32,-0.12 Z M0.12,-0.42 L0.32,-0.42 L0.32,-0.12 L0.12,-0.12 Z\"\n    }\n  ],\n  \"transform\": [\n    {\n      \"calculate\": \"(datum.PersonOrder - 1) % cols\",\n      \"as\": \"col\"\n    },\n    {\n      \"calculate\": \"floor((datum.PersonOrder - 1) / cols)\",\n      \"as\": \"row\"\n    },\n    {\n      \"calculate\": \"datum.FearsKept > 0 ? ''kept'' : ''none''\",\n      \"as\": \"band\"\n    }\n  ],\n  \"layer\": [\n    {\n      \"encoding\": {\n        \"x\": {\n          \"field\": \"col\",\n          \"type\": \"quantitative\",\n          \"axis\": null,\n          \"scale\": {\n            \"domain\": [\n              -0.6,\n              20.6\n            ],\n            \"nice\": false,\n            \"zero\": false\n          }\n        },\n        \"y\": {\n          \"field\": \"row\",\n          \"type\": \"quantitative\",\n          \"axis\": null,\n          \"scale\": {\n            \"domain\": [\n              -0.65,\n              6.85\n            ],\n            \"nice\": false,\n            \"zero\": false,\n            \"reverse\": true\n          }\n        }\n      },\n      \"layer\": [\n        {\n          \"transform\": [\n            {\n              \"filter\": \"datum.FearsKept == 0\"\n            }\n          ],\n          \"mark\": {\n            \"type\": \"point\",\n            \"shape\": {\n              \"expr\": \"ghost\"\n            },\n            \"filled\": false,\n            \"stroke\": \"#9A86B5\",\n            \"strokeWidth\": 1.6,\n            \"size\": 620,\n            \"opacity\": 1\n          },\n          \"encoding\": {\n            \"tooltip\": [\n              {\n                \"field\": \"FearsKept\",\n                \"title\": \"Identical fears in both lists\"\n              },\n              {\n                \"field\": \"KeptFears\",\n                \"title\": \"Which ones\"\n              }\n            ]\n          }\n        },\n        {\n          \"transform\": [\n            {\n              \"filter\": \"datum.FearsKept > 0\"\n            }\n          ],\n          \"mark\": {\n            \"type\": \"point\",\n            \"shape\": {\n              \"expr\": \"ghost\"\n            },\n            \"filled\": true,\n            \"fill\": \"#B4F2C4\",\n            \"opacity\": 1,\n            \"size\": 620\n          },\n          \"encoding\": {\n            \"tooltip\": [\n              {\n                \"field\": \"FearsKept\",\n                \"title\": \"Identical fears in both lists\"\n              },\n              {\n                \"field\": \"KeptFears\",\n                \"title\": \"Which ones\"\n              }\n            ]\n          }\n        },\n        {\n          \"transform\": [\n            {\n              \"filter\": \"datum.FearsKept == 1\"\n            }\n          ],\n          \"mark\": {\n            \"type\": \"point\",\n            \"shape\": {\n              \"expr\": \"eyes\"\n            },\n            \"filled\": true,\n            \"fill\": \"#151020\",\n            \"size\": 620,\n            \"strokeWidth\": 0,\n            \"opacity\": 1\n          }\n        },\n        {\n          \"transform\": [\n            {\n              \"filter\": \"datum.FearsKept > 1\"\n            }\n          ],\n          \"mark\": {\n            \"type\": \"text\",\n            \"fontSize\": 14,\n            \"fontWeight\": 700,\n            \"color\": \"#151020\",\n            \"baseline\": \"middle\",\n            \"dy\": 1\n          },\n          \"encoding\": {\n            \"text\": {\n              \"field\": \"FearsKept\"\n            }\n          }\n        }\n      ]\n    },\n    {\n      \"transform\": [\n        {\n          \"calculate\": \"datum.FearsKept == 1 ? 1 : 0\",\n          \"as\": \"k1\"\n        },\n        {\n          \"calculate\": \"datum.FearsKept == 2 ? 1 : 0\",\n          \"as\": \"k2\"\n        },\n        {\n          \"calculate\": \"datum.FearsKept == 3 ? 1 : 0\",\n          \"as\": \"k3\"\n        },\n        {\n          \"calculate\": \"datum.FearsKept == 0 ? 1 : 0\",\n          \"as\": \"k0\"\n        },\n        {\n          \"aggregate\": [\n            {\n              \"op\": \"sum\",\n              \"field\": \"k1\",\n              \"as\": \"n1\"\n            },\n            {\n              \"op\": \"sum\",\n              \"field\": \"k2\",\n              \"as\": \"n2\"\n            },\n            {\n              \"op\": \"sum\",\n              \"field\": \"k3\",\n              \"as\": \"n3\"\n            },\n            {\n              \"op\": \"sum\",\n              \"field\": \"k0\",\n              \"as\": \"n0\"\n            }\n          ]\n        },\n        {\n          \"calculate\": \"''= kept at least one identical fear:  '' + datum.n1 + '' kept one  ·  '' + datum.n2 + '' kept two  ·  '' + datum.n3 + '' kept three''\",\n          \"as\": \"t1\"\n        },\n        {\n          \"calculate\": \"''= no identical fear  ('' + datum.n0 + '')''\",\n          \"as\": \"t0\"\n        }\n      ],\n      \"layer\": [\n        {\n          \"mark\": {\n            \"type\": \"point\",\n            \"shape\": {\n              \"expr\": \"ghost\"\n            },\n            \"filled\": true,\n            \"fill\": \"#B4F2C4\",\n            \"size\": 300,\n            \"opacity\": 1\n          },\n          \"encoding\": {\n            \"x\": {\n              \"datum\": 0,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.6,\n                  20.6\n                ],\n                \"nice\": false,\n                \"zero\": false\n              },\n              \"axis\": null\n            },\n            \"y\": {\n              \"datum\": 5.55,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.65,\n                  6.85\n                ],\n                \"nice\": false,\n                \"zero\": false,\n                \"reverse\": true\n              },\n              \"axis\": null\n            }\n          }\n        },\n        {\n          \"mark\": {\n            \"type\": \"text\",\n            \"align\": \"left\",\n            \"baseline\": \"middle\",\n            \"dx\": 14,\n            \"fontSize\": 14,\n            \"color\": \"#F4EBDD\"\n          },\n          \"encoding\": {\n            \"x\": {\n              \"datum\": 0,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.6,\n                  20.6\n                ],\n                \"nice\": false,\n                \"zero\": false\n              },\n              \"axis\": null\n            },\n            \"y\": {\n              \"datum\": 5.55,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.65,\n                  6.85\n                ],\n                \"nice\": false,\n                \"zero\": false,\n                \"reverse\": true\n              },\n              \"axis\": null\n            },\n            \"text\": {\n              \"field\": \"t1\"\n            }\n          }\n        },\n        {\n          \"mark\": {\n            \"type\": \"point\",\n            \"shape\": {\n              \"expr\": \"ghost\"\n            },\n            \"filled\": false,\n            \"stroke\": \"#9A86B5\",\n            \"strokeWidth\": 1.5,\n            \"size\": 300,\n            \"opacity\": 1\n          },\n          \"encoding\": {\n            \"x\": {\n              \"datum\": 0,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.6,\n                  20.6\n                ],\n                \"nice\": false,\n                \"zero\": false\n              },\n              \"axis\": null\n            },\n            \"y\": {\n              \"datum\": 6.35,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.65,\n                  6.85\n                ],\n                \"nice\": false,\n                \"zero\": false,\n                \"reverse\": true\n              },\n              \"axis\": null\n            }\n          }\n        },\n        {\n          \"mark\": {\n            \"type\": \"text\",\n            \"align\": \"left\",\n            \"baseline\": \"middle\",\n            \"dx\": 14,\n            \"fontSize\": 14,\n            \"color\": \"#F4EBDD\"\n          },\n          \"encoding\": {\n            \"x\": {\n              \"datum\": 0,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.6,\n                  20.6\n                ],\n                \"nice\": false,\n                \"zero\": false\n              },\n              \"axis\": null\n            },\n            \"y\": {\n              \"datum\": 6.35,\n              \"type\": \"quantitative\",\n              \"scale\": {\n                \"domain\": [\n                  -0.65,\n                  6.85\n                ],\n                \"nice\": false,\n                \"zero\": false,\n                \"reverse\": true\n              },\n              \"axis\": null\n            },\n            \"text\": {\n              \"field\": \"t0\"\n            }\n          }\n        }\n      ]\n    }\n  ]\n}'"
+                }
+              }
+            },
+            "jsonConfig": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{}'"
+                }
+              }
+            },
+            "renderMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'svg'"
+                }
+              }
+            },
+            "enableTooltips": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableContextMenu": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableSelection": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "enableHighlight": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "version": {
+              "expr": {
+                "Literal": {
+                  "Value": "'6.4.3'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "stateManagement": [
+        {
+          "properties": {
+            "viewportHeight": {
+              "expr": {
+                "Literal": {
+                  "Value": "206D"
+                }
+              }
+            },
+            "viewportWidth": {
+              "expr": {
+                "Literal": {
+                  "Value": "800D"
+                }
+              }
+            },
+            "supportFieldConfiguration": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\"ResponseKey\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":false,\"formatted\":false,\"names\":false},\"FearsKept\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":false,\"formatted\":false,\"names\":false},\"PersonOrder\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":false,\"formatted\":false,\"names\":false},\"KeptFears\":{\"highlight\":false,\"highlightStatus\":false,\"highlightComparator\":false,\"format\":false,\"formatted\":false,\"names\":false}}'"
+                }
+              }
+            },
+            "denebMetaVersion": {
+              "expr": {
+                "Literal": {
+                  "Value": "'2'"
+                }
+              }
+            },
+            "consolidateFieldParameters": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "developer": [
+        {
+          "properties": {
+            "version": {
+              "expr": {
+                "Literal": {
+                  "Value": "'2.0.0.0'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "general": [
+        {
+          "properties": {
+            "altText": {
+              "expr": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "Alt Ghosts"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualTooltip": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "type": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Canvas'"
+                }
+              }
+            },
+            "section": {
+              "expr": {
+                "Literal": {
+                  "Value": "'523a15a88e5fc96ce3b4'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "bad9fa99a07f2ea4a9db",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Respondent"
+              }
+            },
+            "Property": "ResponseKey"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "7f6a8606cd0780d601b6",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Respondent"
+              }
+            },
+            "Property": "FearsKept"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "8033fe9056b9be9347e8",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Respondent"
+              }
+            },
+            "Property": "PersonOrder"
+          }
+        },
+        "type": "Advanced"
+      },
+      {
+        "name": "acf57b1a1bf60cea2c75",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "Respondent"
+              }
+            },
+            "Property": "KeptFears"
+          }
+        },
+        "type": "Categorical"
+      }
+    ]
+  }
+}

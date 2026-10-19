@@ -1,0 +1,20 @@
+relationship FactFearSelection_DimFear
+	fromColumn: FactFearSelection.FearKey
+	toColumn: DimFear.FearKey
+
+relationship FactFearSelection_DimAgeGroup
+	fromColumn: FactFearSelection.AgeGroupKey
+	toColumn: DimAgeGroup.AgeGroupKey
+
+relationship FactFearSelection_DimGender
+	fromColumn: FactFearSelection.GenderKey
+	toColumn: DimGender.GenderKey
+
+relationship FactFearSelection_DimCountry
+	fromColumn: FactFearSelection.CountryKey
+	toColumn: DimCountry.CountryKey
+
+relationship Respondent_FactFearSelection
+	fromColumn: FactFearSelection.ResponseKey
+	toColumn: Respondent.ResponseKey
+

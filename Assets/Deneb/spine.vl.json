@@ -1,0 +1,433 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "THE SPINE OF FEAR - butterfly comparison. Left: respondents naming each fear for childhood. Right: respondents naming it today. Mint stripe: respondents who named the identical fear in both lists. Rows: fears ranked top 5 (with ties) in either period, ordered by change. All values come from the Power BI model.",
+  "data": {
+    "name": "dataset"
+  },
+  "width": "container",
+  "height": "container",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
+  "padding": {
+    "left": 4,
+    "right": 4,
+    "top": 2,
+    "bottom": 2
+  },
+  "background": "transparent",
+  "config": {
+    "view": {
+      "stroke": null
+    },
+    "font": "Segoe UI",
+    "text": {
+      "font": "Segoe UI"
+    }
+  },
+  "transform": [
+    {
+      "filter": "datum['Spine Include'] == 1"
+    },
+    {
+      "calculate": "datum['Childhood Respondents'] ? datum['Childhood Respondents'] : 0",
+      "as": "C"
+    },
+    {
+      "calculate": "datum['Now Respondents'] ? datum['Now Respondents'] : 0",
+      "as": "N"
+    },
+    {
+      "calculate": "datum['Kept Respondents'] ? datum['Kept Respondents'] : 0",
+      "as": "K"
+    },
+    {
+      "calculate": "datum.N - datum.C",
+      "as": "D"
+    },
+    {
+      "joinaggregate": [
+        {
+          "op": "max",
+          "field": "C",
+          "as": "MC"
+        },
+        {
+          "op": "max",
+          "field": "N",
+          "as": "MN"
+        }
+      ]
+    },
+    {
+      "calculate": "max(datum.MC, datum.MN)",
+      "as": "M"
+    },
+    {
+      "calculate": "datum.M * 0.50",
+      "as": "G"
+    },
+    {
+      "calculate": "datum.M * 1.62",
+      "as": "E"
+    },
+    {
+      "window": [
+        {
+          "op": "row_number",
+          "as": "Order"
+        }
+      ],
+      "sort": [
+        {
+          "field": "D",
+          "order": "descending"
+        },
+        {
+          "field": "N",
+          "order": "descending"
+        },
+        {
+          "field": "Fear",
+          "order": "ascending"
+        }
+      ]
+    },
+    {
+      "calculate": "-(datum.G + datum.C)",
+      "as": "xl"
+    },
+    {
+      "calculate": "-datum.G",
+      "as": "xl0"
+    },
+    {
+      "calculate": "datum.G",
+      "as": "xr0"
+    },
+    {
+      "calculate": "datum.G + datum.N",
+      "as": "xr"
+    },
+    {
+      "calculate": "-(datum.G + datum.K)",
+      "as": "kl"
+    },
+    {
+      "calculate": "datum.G + datum.K",
+      "as": "kr"
+    },
+    {
+      "calculate": "-datum.G * 0.93",
+      "as": "vl"
+    },
+    {
+      "calculate": "datum.G * 0.93",
+      "as": "vr"
+    },
+    {
+      "calculate": "-datum.E",
+      "as": "el"
+    },
+    {
+      "calculate": "datum['Childhood Rank'] && datum['Childhood Rank'] <= 3 ? '#' + datum['Childhood Rank'] + '  ' : ''",
+      "as": "rcTag"
+    },
+    {
+      "calculate": "datum['Now Rank'] && datum['Now Rank'] <= 3 ? '  #' + datum['Now Rank'] : ''",
+      "as": "rnTag"
+    },
+    {
+      "calculate": "datum.rcTag + datum.C",
+      "as": "leftLabel"
+    },
+    {
+      "calculate": "datum.N + datum.rnTag",
+      "as": "rightLabel"
+    },
+    {
+      "calculate": "(datum.D > 0 ? '▲ +' + datum.D : (datum.D < 0 ? '▼ −' + abs(datum.D) : '◆ 0')) + (datum.K > 0 ? '   ·   ' + datum.K + ' kept it' : '   ·   none kept it')",
+      "as": "changeLabel"
+    }
+  ],
+  "encoding": {
+    "y": {
+      "field": "Fear",
+      "type": "nominal",
+      "sort": {
+        "field": "Order",
+        "order": "ascending"
+      },
+      "axis": null,
+      "scale": {
+        "paddingInner": 0.2,
+        "paddingOuter": 0.05
+      }
+    }
+  },
+  "layer": [
+    {
+      "mark": {
+        "type": "rule",
+        "opacity": 0
+      },
+      "encoding": {
+        "x": {
+          "field": "el",
+          "type": "quantitative",
+          "axis": null,
+          "scale": {
+            "nice": false,
+            "zero": false
+          }
+        },
+        "x2": {
+          "field": "E"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "rule",
+        "color": "#4A3860",
+        "strokeWidth": 4,
+        "strokeCap": "round"
+      },
+      "encoding": {
+        "x": {
+          "datum": 0,
+          "type": "quantitative"
+        },
+        "y": null
+      }
+    },
+    {
+      "mark": {
+        "type": "bar",
+        "cornerRadius": 18,
+        "color": "#24172F",
+        "stroke": "#5A4775",
+        "strokeWidth": 1.2,
+        "height": {
+          "band": 1
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "vl",
+          "type": "quantitative"
+        },
+        "x2": {
+          "field": "vr"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "bar",
+        "color": "#8463BF",
+        "height": {
+          "band": 0.62
+        },
+        "cornerRadiusTopLeft": 4,
+        "cornerRadiusBottomLeft": 4
+      },
+      "encoding": {
+        "x": {
+          "field": "xl",
+          "type": "quantitative"
+        },
+        "x2": {
+          "field": "xl0"
+        },
+        "tooltip": [
+          {
+            "field": "Fear",
+            "type": "nominal",
+            "title": "Fear"
+          },
+          {
+            "field": "C",
+            "type": "quantitative",
+            "title": "Respondents, childhood"
+          },
+          {
+            "field": "K",
+            "type": "quantitative",
+            "title": "Named it in both lists"
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "bar",
+        "color": "#B8622F",
+        "height": {
+          "band": 0.62
+        },
+        "cornerRadiusTopRight": 4,
+        "cornerRadiusBottomRight": 4
+      },
+      "encoding": {
+        "x": {
+          "field": "xr0",
+          "type": "quantitative"
+        },
+        "x2": {
+          "field": "xr"
+        },
+        "tooltip": [
+          {
+            "field": "Fear",
+            "type": "nominal",
+            "title": "Fear"
+          },
+          {
+            "field": "N",
+            "type": "quantitative",
+            "title": "Respondents, today"
+          },
+          {
+            "field": "K",
+            "type": "quantitative",
+            "title": "Named it in both lists"
+          }
+        ]
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.K > 0"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "color": "#B4F2C4",
+        "height": {
+          "band": 0.2
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "kl",
+          "type": "quantitative"
+        },
+        "x2": {
+          "field": "xl0"
+        }
+      }
+    },
+    {
+      "transform": [
+        {
+          "filter": "datum.K > 0"
+        }
+      ],
+      "mark": {
+        "type": "bar",
+        "color": "#B4F2C4",
+        "height": {
+          "band": 0.2
+        }
+      },
+      "encoding": {
+        "x": {
+          "field": "xr0",
+          "type": "quantitative"
+        },
+        "x2": {
+          "field": "kr"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "right",
+        "baseline": "middle",
+        "dx": -9,
+        "fontSize": 19,
+        "fontWeight": 600,
+        "color": "#F4EBDD"
+      },
+      "encoding": {
+        "x": {
+          "field": "xl",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "leftLabel"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "left",
+        "baseline": "middle",
+        "dx": 9,
+        "fontSize": 19,
+        "fontWeight": 600,
+        "color": "#F4EBDD"
+      },
+      "encoding": {
+        "x": {
+          "field": "xr",
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "rightLabel"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "center",
+        "baseline": "middle",
+        "dy": -8,
+        "fontSize": 15.5,
+        "fontWeight": 600,
+        "color": "#F4EBDD"
+      },
+      "encoding": {
+        "x": {
+          "datum": 0,
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "Fear"
+        }
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "center",
+        "baseline": "middle",
+        "dy": 11,
+        "fontSize": 12.5,
+        "fontWeight": 600
+      },
+      "encoding": {
+        "x": {
+          "datum": 0,
+          "type": "quantitative"
+        },
+        "text": {
+          "field": "changeLabel"
+        },
+        "color": {
+          "condition": {
+            "test": "datum.D > 0",
+            "value": "#FFB886"
+          },
+          "value": "#C9B8E0"
+        }
+      }
+    }
+  ]
+}

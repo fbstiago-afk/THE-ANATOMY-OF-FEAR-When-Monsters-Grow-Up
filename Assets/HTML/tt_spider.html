@@ -1,0 +1,19 @@
+<style>
+.sp{width:100%;height:100%;overflow:hidden;position:relative}
+.sp svg{width:100%;height:100%}
+.sp .bob{animation:spdrop 4.5s ease-in-out infinite;transform-origin:40px 0}
+.sp .leg{animation:spwig .5s ease-in-out infinite alternate;transform-origin:center;transform-box:fill-box}
+.sp .eye{animation:spblink 3s infinite}
+@keyframes spdrop{0%{transform:translateY(-26px) rotate(0)}35%{transform:translateY(4px) rotate(6deg)}55%{transform:translateY(0) rotate(-6deg)}75%{transform:translateY(3px) rotate(3deg)}100%{transform:translateY(-26px) rotate(0)}}
+@keyframes spwig{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+@keyframes spblink{0%,90%,100%{opacity:1}94%{opacity:.1}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+<div class='sp'><svg viewBox='0 0 80 80' aria-hidden='true' focusable='false'><g class='bob'>
+<line x1='40' y1='0' x2='40' y2='44' stroke='#C9B8E0' stroke-width='1'/>
+<g class='leg' stroke='#BD9AF7' stroke-width='2' fill='none' stroke-linecap='round'>
+<path d='M34 50 L22 42 L16 48'/><path d='M34 53 L20 52 L14 58'/><path d='M34 56 L22 62 L18 70'/><path d='M35 58 L28 68 L26 76'/>
+<path d='M46 50 L58 42 L64 48'/><path d='M46 53 L60 52 L66 58'/><path d='M46 56 L58 62 L62 70'/><path d='M45 58 L52 68 L54 76'/></g>
+<ellipse cx='40' cy='54' rx='9' ry='10' fill='#24172F' stroke='#BD9AF7' stroke-width='1.5'/>
+<circle cx='40' cy='44' r='6' fill='#24172F' stroke='#BD9AF7' stroke-width='1.5'/>
+<g class='eye' fill='#FF858E'><circle cx='37.6' cy='43.5' r='1.6'/><circle cx='42.4' cy='43.5' r='1.6'/></g>
+<path d='M36 57 L44 57 M38 53 L42 53' stroke='#FF858E' stroke-width='1.2'/></g></svg></div>

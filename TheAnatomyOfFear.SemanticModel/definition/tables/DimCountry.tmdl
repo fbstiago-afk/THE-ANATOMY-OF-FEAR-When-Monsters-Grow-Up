@@ -1,0 +1,76 @@
+/// Countries from childhood and current residence, filtered according to the selection life stage.
+table DimCountry
+	lineageTag: 9b2c9df9-726a-4456-8a3c-679a091763a8
+
+	column CountryKey
+		dataType: int64
+		isHidden
+		lineageTag: 7f56ddfa-3ba4-417d-a58d-0f35c9a6c538
+		summarizeBy: none
+		sourceColumn: CountryKey
+
+	column Country
+		dataType: string
+		lineageTag: bebad183-27a2-47b6-94d4-782591029e99
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: Country
+
+	/// Groups countries into continents. Russia is grouped with Europe, following UN M49. North America includes Central America. Countries not yet in the lookup appear as Unknown.
+	column Continent
+		dataType: string
+		lineageTag: 94e4c628-111b-4bb5-bd05-8d66f171cf86
+		dataCategory: Continent
+		summarizeBy: none
+		sourceColumn: Continent
+
+	partition DimCountry = m
+		mode: import
+		source =
+				let
+				 Clean = (v as any) as text => if v = null or Text.Trim(Text.From(v)) = "" then "(Unknown)" else Text.Trim(Text.From(v)),
+				 Parse = (v as any) as list => if v = null or Text.Trim(Text.From(v)) = "" then {} else let j = Json.Document(v) in if not Value.Is(j, type list) then error "Fear JSON must be a list" else List.Distinct(List.Select(List.Transform(j, each if _ = null then "" else Text.Trim(Text.From(_))), each _ <> "")),
+				 Values = raw_survey_responses[countryChildhood] & raw_survey_responses[countryNow],
+				 Unique = List.Sort(List.Distinct(List.Transform(Values, each Clean(_)))),
+				 Labels = Table.FromList(Unique, Splitter.SplitByNothing(), {"Country"}),
+				 Keys = Table.AddIndexColumn(Labels, "CountryKey", 1, 1, Int64.Type),
+				 // Country groups follow UN M49; the Americas are split into North and South America.
+				 ContinentLookup = #table(type table [Country=text, Continent=text], {
+				        {"Argentina", "South America"},
+				        {"Brazil", "South America"},
+				        {"Canada", "North America"},
+				        {"Nicaragua", "North America"},
+				        {"United States", "North America"},
+				        {"China", "Asia"},
+				        {"India", "Asia"},
+				        {"Indonesia", "Asia"},
+				        {"Morocco", "Africa"},
+				        {"Nigeria", "Africa"},
+				        {"South Africa", "Africa"},
+				        {"Austria", "Europe"},
+				        {"Belgium", "Europe"},
+				        {"Denmark", "Europe"},
+				        {"Finland", "Europe"},
+				        {"France", "Europe"},
+				        {"Germany", "Europe"},
+				        {"Hungary", "Europe"},
+				        {"Iceland", "Europe"},
+				        {"Ireland", "Europe"},
+				        {"Italy", "Europe"},
+				        {"Moldova", "Europe"},
+				        {"Netherlands", "Europe"},
+				        {"North Macedonia", "Europe"},
+				        {"Poland", "Europe"},
+				        {"Portugal", "Europe"},
+				        {"Romania", "Europe"},
+				        {"Russia", "Europe"},
+				        {"Spain", "Europe"},
+				        {"Sweden", "Europe"},
+				        {"Switzerland", "Europe"},
+				        {"United Kingdom", "Europe"}
+				 }),
+				 Joined = Table.NestedJoin(Keys, {"Country"}, ContinentLookup, {"Country"}, "Geography", JoinKind.LeftOuter),
+				 Expanded = Table.ExpandTableColumn(Joined, "Geography", {"Continent"}),
+				 Result = Table.ReplaceValue(Expanded, null, "Unknown", Replacer.ReplaceValue, {"Continent"})
+				in Result
+

@@ -1,0 +1,29 @@
+/// Respondent age group at submission; not childhood age.
+table DimAgeGroup
+	lineageTag: ebf762d0-e310-483b-9207-b106d7d48663
+
+	column AgeGroupKey
+		dataType: int64
+		isHidden
+		lineageTag: 12570017-ea81-4ea8-b6f3-39209fb520b0
+		summarizeBy: none
+		sourceColumn: AgeGroupKey
+
+	column AgeGroup
+		dataType: string
+		lineageTag: de4dd269-2a06-4de4-b72d-5711d01bf9d1
+		summarizeBy: none
+		sourceColumn: AgeGroup
+
+	partition DimAgeGroup = m
+		mode: import
+		source =
+				let
+				 Clean = (v as any) as text => if v = null or Text.Trim(Text.From(v)) = "" then "(Unknown)" else Text.Trim(Text.From(v)),
+				 Parse = (v as any) as list => if v = null or Text.Trim(Text.From(v)) = "" then {} else let j = Json.Document(v) in if not Value.Is(j, type list) then error "Fear JSON must be a list" else List.Distinct(List.Select(List.Transform(j, each if _ = null then "" else Text.Trim(Text.From(_))), each _ <> "")),
+				 Values = raw_survey_responses[ageGroup],
+				 Unique = List.Sort(List.Distinct(List.Transform(Values, each Clean(_)))),
+				 Labels = Table.FromList(Unique, Splitter.SplitByNothing(), {"AgeGroup"}),
+				 Keys = Table.AddIndexColumn(Labels, "AgeGroupKey", 1, 1, Int64.Type)
+				in Keys
+

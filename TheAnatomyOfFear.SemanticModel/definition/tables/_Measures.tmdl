@@ -1,0 +1,737 @@
+table _Measures
+	lineageTag: d2e28628-f273-4dc2-82df-4cffff0bf3ad
+
+	/// Counts people who picked the fear shown in the chart.
+	/// Each person counts once. The total counts people, even if they picked several fears.
+	/// Your life stage, gender, age and country filters apply. People with no fears picked are not included.
+	measure 'Number of Respondents' =
+			
+			// Counts people who picked the fear shown in the chart.
+			// Each person counts once. The total counts people, even if they picked several fears.
+			DISTINCTCOUNT ( 'FactFearSelection'[ResponseKey] )
+		formatString: #,##0
+		displayFolder: Starter Measures
+		lineageTag: 447081b7-6edc-45bd-9a89-ebeaf7a5f904
+
+	/// Counts fears people picked both as kids and as adults.
+	/// If someone picked spiders in both lists, that counts as 1.
+	/// If they picked spiders and heights in both lists, they add 2 to the total.
+	measure 'Responses Where Fears Remained' =
+			// Counts fears people picked both as kids and as adults.
+			// If someone picked spiders in both lists, that counts as 1.
+			CALCULATE (
+			    COUNTROWS (
+			        SUMMARIZE (
+			            'FactFearSelection',
+			            'FactFearSelection'[ResponseKey],
+			            'FactFearSelection'[FearKey]
+			        )
+			    ),
+			    KEEPFILTERS ( 'FactFearSelection'[IsRetained] = TRUE () )
+			)
+		formatString: #,##0
+		displayFolder: Starter Measures
+		lineageTag: c0184d62-3af2-4688-9b8d-bbfadf289ae4
+
+	/// Counts how many fears people picked.
+	/// If someone picked three fears, they add 3 to the total.
+	/// The same fear picked as a kid and as an adult counts twice when both stages are shown.
+	measure 'Number of Fear Selections' =
+			
+			// Counts how many fears people picked.
+			// If someone picked three fears, they add 3 to the total.
+			COUNTROWS ( 'FactFearSelection' )
+		formatString: #,##0
+		displayFolder: Starter Measures
+		lineageTag: 80c875b7-033f-45e5-adc4-e71b3cc3c409
+
+	/// Counts fears people picked as kids but not as adults.
+	/// If someone picked two of these fears, they add 2 to the total.
+	measure 'Childhood-Only Fear Selections' =
+			
+			// Counts fears people picked as kids but not as adults.
+			// If someone picked two of these fears, they add 2 to the total.
+			CALCULATE (
+			    COUNTROWS (
+			        SUMMARIZE (
+			            'FactFearSelection',
+			            'FactFearSelection'[ResponseKey],
+			            'FactFearSelection'[FearKey]
+			        )
+			    ),
+			    KEEPFILTERS ( 'FactFearSelection'[FearPattern] = "Childhood only" )
+			)
+		formatString: #,##0
+		displayFolder: Starter Measures
+		lineageTag: 8ce0e342-4762-4e56-8094-fc6911269d99
+
+	/// Counts fears people picked as adults but not as kids.
+	/// If someone picked two of these fears, they add 2 to the total.
+	measure 'Adult-Only Fear Selections' =
+			
+			// Counts fears people picked as adults but not as kids.
+			// If someone picked two of these fears, they add 2 to the total.
+			CALCULATE (
+			    COUNTROWS (
+			        SUMMARIZE (
+			            'FactFearSelection',
+			            'FactFearSelection'[ResponseKey],
+			            'FactFearSelection'[FearKey]
+			        )
+			    ),
+			    KEEPFILTERS ( 'FactFearSelection'[FearPattern] = "Adult only" )
+			)
+		formatString: #,##0
+		displayFolder: Starter Measures
+		lineageTag: fb223b51-21d6-4697-9919-5f751467da3c
+
+	/// Shows the percentage of people who picked a fear.
+	/// For example, 20% means 1 in 5 people in the chosen group picked it.
+	/// People with no fears picked are not included. People can pick several fears, so the percentages can add up to more than 100%.
+	measure 'Respondents Selecting Fear (%)' =
+			// Shows the percentage of people who picked a fear.
+			// For example, 20% means 1 in 5 people in the chosen group picked it.
+			VAR _respondentsSelectingFear =
+			    [Number of Respondents]
+			VAR _respondentsInGroup =
+			    CALCULATE (
+			        [Number of Respondents],
+			        REMOVEFILTERS ( 'DimFear' )
+			    )
+			RETURN
+			    DIVIDE ( _respondentsSelectingFear, _respondentsInGroup )
+		formatString: 0.0%
+		displayFolder: Starter Measures
+		lineageTag: 6ae94dbc-0d87-40d1-b018-20ff3e1a3bd9
+
+	/// Survey responses (one row per ResponseKey in Respondent). Denominator for every share on the poster.
+	measure Responses = COUNTROWS ( Respondent )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\1 Core
+		lineageTag: d28bd4da-3547-4668-a0d5-80764243f0a3
+
+	/// Fear selections in the childhood list. A respondent could select several fears, so this is NOT a count of people.
+	measure 'Childhood Fear Mentions' =
+			CALCULATE (
+			    COUNTROWS ( FactFearSelection ),
+			    KEEPFILTERS ( FactFearSelection[LifeStage] = "Childhood" )
+			)
+		formatString: #,0
+		displayFolder: Anatomy of Fear\1 Core
+		lineageTag: d027de88-4569-4c0c-ab3d-a0f802798e10
+
+	/// Fear selections in the current (adult) list. A respondent could select several fears, so this is NOT a count of people.
+	measure 'Current Fear Mentions' =
+			CALCULATE (
+			    COUNTROWS ( FactFearSelection ),
+			    KEEPFILTERS ( FactFearSelection[LifeStage] = "Adult" )
+			)
+		formatString: #,0
+		displayFolder: Anatomy of Fear\1 Core
+		lineageTag: 992e0499-a5dd-4782-a56a-6a218e217358
+
+	/// Largest number of fears any respondent selected in one list (childhood or current).
+	measure 'Max Fears per List' = MAX ( MAX ( Respondent[ChildhoodFearCount] ), MAX ( Respondent[CurrentFearCount] ) )
+		formatString: 0
+		displayFolder: Anatomy of Fear\1 Core
+		lineageTag: 878b0cd1-7b23-4709-a378-7fc3dc97cbb9
+
+	/// Distinct respondents who selected the fear(s) in context, in any period (respects a LifeStage filter if present).
+	measure 'Respondents by Fear' = DISTINCTCOUNT ( FactFearSelection[ResponseKey] )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 3b0335dc-2955-47b1-960e-8f5b0c1aadc4
+
+	/// Distinct respondents who selected the fear in their childhood list.
+	measure 'Childhood Respondents' =
+			CALCULATE (
+			    DISTINCTCOUNT ( FactFearSelection[ResponseKey] ),
+			    KEEPFILTERS ( FactFearSelection[LifeStage] = "Childhood" )
+			)
+		formatString: #,0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 43ae7b3d-5149-46ae-9a27-2762bba7a59a
+
+	/// Distinct respondents who selected the fear in their current (adult) list.
+	measure 'Now Respondents' =
+			CALCULATE (
+			    DISTINCTCOUNT ( FactFearSelection[ResponseKey] ),
+			    KEEPFILTERS ( FactFearSelection[LifeStage] = "Adult" )
+			)
+		formatString: #,0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: cf79cd93-81a9-4535-93ab-8f36b98957a7
+
+	/// Distinct respondents who selected exactly the same fear in BOTH lists (IsRetained). Not a causal or continuous-fear claim.
+	measure 'Kept Respondents' =
+			CALCULATE (
+			    DISTINCTCOUNT ( FactFearSelection[ResponseKey] ),
+			    KEEPFILTERS ( FactFearSelection[IsRetained] = TRUE () )
+			)
+		formatString: #,0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: f1144878-f8d4-4b7b-ab61-b9e35a19e4d0
+
+	/// Respondents selecting the fear in context divided by all respondents.
+	measure 'Fear Share' = DIVIDE ( [Respondents by Fear], [Responses] )
+		formatString: 0.0%
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: fe1b3f5b-17be-4452-9ead-6ec83a33472b
+
+	/// Childhood respondents for the fear divided by all respondents.
+	measure 'Childhood Fear Share' = DIVIDE ( [Childhood Respondents], [Responses] )
+		formatString: 0.0%
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 72ca7f8b-cc22-4d47-8cf0-1329c9557405
+
+	/// Current respondents for the fear divided by all respondents.
+	measure 'Now Fear Share' = DIVIDE ( [Now Respondents], [Responses] )
+		formatString: 0.0%
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 009c7703-908d-448a-a9e1-2ac1f1e05b16
+
+	/// Current respondents minus childhood respondents for the fear. Difference between two aggregate counts, NOT individual transitions.
+	measure 'Fear Change' = COALESCE ( [Now Respondents], 0 ) - COALESCE ( [Childhood Respondents], 0 )
+		formatString: +0;-0;0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 814a79a4-fdcf-4d07-91aa-c114f3f0d7ee
+
+	/// Current share minus childhood share (percentage points of all respondents).
+	measure 'Fear Share Difference' = COALESCE ( [Now Fear Share], 0 ) - COALESCE ( [Childhood Fear Share], 0 )
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: f25fe696-2464-44bd-bf77-c4f19739dd1f
+
+	/// Rank of the fear by childhood respondents (1 = most selected, ties share a rank, SKIP). Excludes non-fear answers (Other Responses category).
+	measure 'Childhood Rank' =
+			VAR _value = [Childhood Respondents]
+			VAR _isFear = SELECTEDVALUE ( DimFear[Category] ) <> "Other Responses"
+			RETURN
+			    IF (
+			        HASONEVALUE ( DimFear[Fear] ) && _isFear && _value > 0,
+			        RANKX ( CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Childhood Respondents], _value, DESC, SKIP )
+			    )
+		formatString: 0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 90fc0f82-bda8-4055-8d49-cf3c42a92ddf
+
+	/// Rank of the fear by current respondents (1 = most selected, ties share a rank, SKIP). Excludes non-fear answers.
+	measure 'Now Rank' =
+			VAR _value = [Now Respondents]
+			VAR _isFear = SELECTEDVALUE ( DimFear[Category] ) <> "Other Responses"
+			RETURN
+			    IF (
+			        HASONEVALUE ( DimFear[Fear] ) && _isFear && _value > 0,
+			        RANKX ( CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Now Respondents], _value, DESC, SKIP )
+			    )
+		formatString: 0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 4d85709c-b572-49a1-859b-0a83f7e28427
+
+	/// Rank of the fear by respondents in the current filter context (for example a LifeStage filter).
+	measure 'Fear Rank' =
+			VAR _value = [Respondents by Fear]
+			VAR _isFear = SELECTEDVALUE ( DimFear[Category] ) <> "Other Responses"
+			RETURN
+			    IF (
+			        HASONEVALUE ( DimFear[Fear] ) && _isFear && _value > 0,
+			        RANKX ( CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Respondents by Fear], _value, DESC, SKIP )
+			    )
+		formatString: 0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 22baa91e-e892-4c86-ab37-126f187f3b80
+
+	/// Display rule (not data): a fear appears on the spine chart when it ranks within this Top N in either period.
+	measure 'Spine Top N' = 5
+		formatString: 0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: fb966d35-f2a9-4d56-9e54-4f06a1b391c2
+
+	/// 1 when the fear ranks within [Spine Top N] in childhood OR today; otherwise 0. Used by the Deneb spine chart.
+	measure 'Spine Include' =
+			VAR _c = [Childhood Rank]
+			VAR _n = [Now Rank]
+			VAR _top = [Spine Top N]
+			RETURN
+			    IF (
+			        ( NOT ISBLANK ( _c ) && _c <= _top ) || ( NOT ISBLANK ( _n ) && _n <= _top ),
+			        1,
+			        0
+			    )
+		formatString: 0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: ea61ba45-c0c7-40c3-9331-81747399aaf9
+
+	/// Most selected childhood fear (ties broken alphabetically).
+	measure 'Top Childhood Fear' =
+			VAR _t = TOPN ( 1, CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Childhood Respondents], DESC, DimFear[Fear], ASC )
+			RETURN MAXX ( _t, DimFear[Fear] )
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 4dc33a64-b3b9-4376-b065-86eed080ae82
+
+	/// Respondents who selected the top childhood fear.
+	measure 'Top Childhood Fear Respondents' = CALCULATE ( [Childhood Respondents], TREATAS ( { [Top Childhood Fear] }, DimFear[Fear] ) )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 4b71ecf6-b1b0-4df8-97c2-f36e12761e88
+
+	/// Most selected current fear (ties broken alphabetically).
+	measure 'Top Current Fear' =
+			VAR _t = TOPN ( 1, CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Now Respondents], DESC, DimFear[Fear], ASC )
+			RETURN MAXX ( _t, DimFear[Fear] )
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 07b376c5-84f0-4885-be55-751ebe32fc37
+
+	/// Respondents who selected the top current fear.
+	measure 'Top Current Fear Respondents' = CALCULATE ( [Now Respondents], TREATAS ( { [Top Current Fear] }, DimFear[Fear] ) )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 72127049-ed30-4280-83cc-903362943d69
+
+	/// Fear with the largest positive [Fear Change] (ties: more current respondents, then alphabetical).
+	measure 'Biggest Rise Fear' =
+			VAR _t = TOPN ( 1, CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Fear Change], DESC, [Now Respondents], DESC, DimFear[Fear], ASC )
+			RETURN MAXX ( _t, DimFear[Fear] )
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 1675ff81-b352-43b1-a625-2d5bf7c546ac
+
+	/// Fear with the most negative [Fear Change] (ties: more childhood respondents, then alphabetical).
+	measure 'Biggest Fall Fear' =
+			VAR _t = TOPN ( 1, CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Fear Change], ASC, [Childhood Respondents], DESC, DimFear[Fear], ASC )
+			RETURN MAXX ( _t, DimFear[Fear] )
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 2cf5c590-3cca-4eaf-a49e-826c1810cf2b
+
+	/// Most selected current fear that NO respondent selected in the childhood list.
+	measure 'Adult Only Top Fear' =
+			VAR _candidates =
+			    FILTER ( CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), ISBLANK ( [Childhood Respondents] ) && [Now Respondents] > 0 )
+			VAR _t = TOPN ( 1, _candidates, [Now Respondents], DESC, DimFear[Fear], ASC )
+			RETURN MAXX ( _t, DimFear[Fear] )
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: 0caa978f-2195-4ccc-bc28-a658347c3767
+
+	/// Fear selected in both lists by the most respondents (ties: higher share of childhood respondents kept, then alphabetical).
+	measure 'Most Loyal Fear' =
+			VAR _t =
+			    TOPN ( 1, CALCULATETABLE (
+			        VALUES ( DimFear[Fear] ),
+			        DimFear[Category] <> "Other Responses",
+			        REMOVEFILTERS ( DimFear )
+			    ), [Kept Respondents], DESC, DIVIDE ( [Kept Respondents], [Childhood Respondents] ), DESC, DimFear[Fear], ASC )
+			RETURN MAXX ( _t, DimFear[Fear] )
+		displayFolder: Anatomy of Fear\2 Fears by period
+		lineageTag: c6069435-c860-4dc9-98de-ad88ea388f3f
+
+	/// Respondents who selected at least one identical fear in their childhood and current lists.
+	measure 'Persistent Fear Respondents' = CALCULATE ( [Responses], KEEPFILTERS ( Respondent[FearsKept] > 0 ) )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\3 Persistence
+		lineageTag: 58e9e8bf-8e62-4fef-9c81-a8703e527721
+
+	/// [Persistent Fear Respondents] / [Responses].
+	measure 'Persistent Fear %' = DIVIDE ( [Persistent Fear Respondents], [Responses] )
+		formatString: 0.0%
+		displayFolder: Anatomy of Fear\3 Persistence
+		lineageTag: baf0ed88-0cae-41b4-b8a6-344efd68f0f2
+
+	/// Respondents with no identical fear in both lists.
+	measure 'No Fear Kept Respondents' = CALCULATE ( [Responses], KEEPFILTERS ( Respondent[FearsKept] = 0 ) )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\3 Persistence
+		lineageTag: fafcb260-38ce-4ee6-a7c6-031df9721d2c
+
+	/// Independent re-computation of persistence from FactFearSelection[IsRetained]; must equal [Persistent Fear Respondents].
+	measure 'Persistent Fear Respondents (Fact check)' =
+			CALCULATE (
+			    DISTINCTCOUNT ( FactFearSelection[ResponseKey] ),
+			    FactFearSelection[IsRetained] = TRUE (),
+			    REMOVEFILTERS ( DimFear )
+			)
+		formatString: #,0
+		displayFolder: Anatomy of Fear\9 QA
+		lineageTag: a077bfb6-4f31-49ca-b88e-dfa7a93bdcaa
+
+	/// Most chosen data nightmare (short label; single-choice question).
+	measure 'Top Data Nightmare' =
+			VAR _t = TOPN ( 1, ALL ( Respondent[Nightmare] ), [Responses], DESC, Respondent[Nightmare], ASC )
+			RETURN MAXX ( _t, Respondent[Nightmare] )
+		displayFolder: Anatomy of Fear\4 Data nightmares
+		lineageTag: ca6e82fc-d922-4897-8efc-7c898024ef7b
+
+	/// Text in brackets of the original answer for the top data nightmare.
+	measure 'Top Data Nightmare Detail' =
+			VAR _top = [Top Data Nightmare]
+			RETURN
+			    MAXX ( FILTER ( ALL ( Respondent[Nightmare], Respondent[NightmareDetail] ), Respondent[Nightmare] = _top ), Respondent[NightmareDetail] )
+		displayFolder: Anatomy of Fear\4 Data nightmares
+		lineageTag: 6622e3bc-d243-48bd-8700-1ec77bdc9d4e
+
+	/// Respondents who chose the top data nightmare.
+	measure 'Data Nightmare Respondents' = CALCULATE ( [Responses], TREATAS ( { [Top Data Nightmare] }, Respondent[Nightmare] ) )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\4 Data nightmares
+		lineageTag: 04f8ea90-4c85-4ef0-9df5-b5e561d9da7c
+
+	/// [Data Nightmare Respondents] / all respondents.
+	measure 'Data Nightmare %' = DIVIDE ( [Data Nightmare Respondents], CALCULATE ( [Responses], REMOVEFILTERS ( Respondent ) ) )
+		formatString: 0.0%
+		displayFolder: Anatomy of Fear\4 Data nightmares
+		lineageTag: f86f07bd-0891-4674-854b-244f22d4832f
+
+	/// Respondents choosing the nightmare in context / all respondents.
+	measure 'Nightmare Share' = DIVIDE ( [Responses], CALCULATE ( [Responses], REMOVEFILTERS ( Respondent ) ) )
+		formatString: 0.0%
+		displayFolder: Anatomy of Fear\4 Data nightmares
+		lineageTag: 954103dc-5fd1-4722-872b-92f783e3822a
+
+	/// Rank of the nightmare answer by respondents (1 = most chosen).
+	measure 'Nightmare Rank' =
+			IF (
+			    HASONEVALUE ( Respondent[Nightmare] ),
+			    RANKX ( ALL ( Respondent[Nightmare] ), [Responses], , DESC, SKIP )
+			)
+		formatString: 0
+		displayFolder: Anatomy of Fear\4 Data nightmares
+		lineageTag: 4560512f-c8d4-4855-9c49-42d535b95b32
+
+	/// Method strip under the headline.
+	measure 'Text Survey Strip' =
+			FORMAT ( [Responses], "#,0" ) & " respondents   " & UNICHAR ( 183 ) & "   "
+			    & FORMAT ( [Childhood Fear Mentions], "#,0" ) & " childhood + "
+			    & FORMAT ( [Current Fear Mentions], "#,0" ) & " current fear selections   " & UNICHAR ( 183 ) & "   up to "
+			    & [Max Fears per List] & " fears per list"
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: 1b18315d-df37-4822-814a-5539fc934eec
+
+	/// e.g. War: 5 -> 19 (respondents, childhood -> today).
+	measure 'Text Biggest Rise' =
+			VAR _f = [Biggest Rise Fear]
+			VAR _c = CALCULATE ( COALESCE ( [Childhood Respondents], 0 ), TREATAS ( { _f }, DimFear[Fear] ) )
+			VAR _n = CALCULATE ( COALESCE ( [Now Respondents], 0 ), TREATAS ( { _f }, DimFear[Fear] ) )
+			RETURN _f & ":  " & _c & "  " & UNICHAR ( 8594 ) & "  " & _n
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: 6fe5103b-7f8e-4528-93f6-095f7f403b1c
+
+	/// e.g. The dark: 11 -> 2 (respondents, childhood -> today).
+	measure 'Text Biggest Fall' =
+			VAR _f = [Biggest Fall Fear]
+			VAR _c = CALCULATE ( COALESCE ( [Childhood Respondents], 0 ), TREATAS ( { _f }, DimFear[Fear] ) )
+			VAR _n = CALCULATE ( COALESCE ( [Now Respondents], 0 ), TREATAS ( { _f }, DimFear[Fear] ) )
+			RETURN _f & ":  " & _c & "  " & UNICHAR ( 8594 ) & "  " & _n
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: 67e1a46c-5eb5-433e-b422-fadfd414041e
+
+	/// Top fear that no respondent named as a child, childhood -> today.
+	measure 'Text Adult Only' =
+			VAR _f = [Adult Only Top Fear]
+			VAR _c = CALCULATE ( COALESCE ( [Childhood Respondents], 0 ), TREATAS ( { _f }, DimFear[Fear] ) )
+			VAR _n = CALCULATE ( COALESCE ( [Now Respondents], 0 ), TREATAS ( { _f }, DimFear[Fear] ) )
+			RETURN _f & ":  " & _c & "  " & UNICHAR ( 8594 ) & "  " & _n
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: d6fab73a-714f-4888-8501-62984f474760
+
+	/// Hero number for Act III.
+	measure 'Text Persistent %' = FORMAT ( [Persistent Fear %], "0.0%" )
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: 91c0bb6d-c8cc-4fa7-a806-be7cfe89f738
+
+	/// 45 of 105 respondents.
+	measure 'Text Persistent Count' = FORMAT ( [Persistent Fear Respondents], "#,0" ) & " of " & FORMAT ( [Responses], "#,0" ) & " respondents"
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: e9a43c29-5e41-44f3-9f3d-f1092cc8e073
+
+	/// Most loyal monster sentence.
+	measure 'Text Most Loyal' =
+			VAR _f = [Most Loyal Fear]
+			VAR _k = CALCULATE ( [Kept Respondents], TREATAS ( { _f }, DimFear[Fear] ) )
+			VAR _c = CALCULATE ( [Childhood Respondents], TREATAS ( { _f }, DimFear[Fear] ) )
+			RETURN
+			    "Most loyal monster:  " & _f & "  " & UNICHAR ( 8212 ) & "  " & _k & " of the " & _c
+			        & " who named it as children still name it today"
+		displayFolder: Anatomy of Fear\5 Poster text
+		lineageTag: 4f92084c-1395-4621-872b-30efd0f3b83d
+
+	/// Alt text for the Deneb spine chart.
+	measure 'Alt Spine' =
+			VAR _tc = [Top Childhood Fear]
+			VAR _tn = [Top Current Fear]
+			RETURN
+			    "Fears then and now, in respondents out of " & [Responses] & ". As children, the most named fear was "
+			        & _tc & " (" & [Top Childhood Fear Respondents] & "). Today it is " & _tn & " (" & [Top Current Fear Respondents]
+			        & "). Biggest rise: " & SUBSTITUTE ( [Text Biggest Rise], ":  ", " from " ) & ". Biggest fall: " & SUBSTITUTE ( [Text Biggest Fall], ":  ", " from " )
+			        & ". Nobody named " & [Adult Only Top Fear] & " as a child; " & CALCULATE ( [Now Respondents], TREATAS ( { [Adult Only Top Fear] }, DimFear[Fear] ) )
+			        & " name it today."
+		displayFolder: Anatomy of Fear\6 Accessibility
+		lineageTag: 8a728659-c296-4924-9edb-0a92d2f31ab8
+
+	/// Alt text for the 105 ghosts unit chart.
+	measure 'Alt Ghosts' =
+			"One ghost per respondent. " & [Persistent Fear Respondents] & " of " & [Responses] & " ("
+			    & FORMAT ( [Persistent Fear %], "0.0%" ) & ") named at least one identical fear as a child and today: "
+			    & CALCULATE ( [Responses], Respondent[FearsKept] = 1 ) & " kept one, "
+			    & CALCULATE ( [Responses], Respondent[FearsKept] = 2 ) & " kept two, "
+			    & CALCULATE ( [Responses], Respondent[FearsKept] = 3 ) & " kept three. "
+			    & [No Fear Kept Respondents] & " kept none. " & [Text Most Loyal] & "."
+		displayFolder: Anatomy of Fear\6 Accessibility
+		lineageTag: 10355e4e-3e3c-4f76-8923-d974a849d83f
+
+	/// Alt text for the data nightmare chart and card.
+	measure 'Alt Nightmares' =
+			"Worst data nightmare, one answer per respondent: " & [Top Data Nightmare] & " ("
+			    & [Top Data Nightmare Detail] & ") was chosen by " & [Data Nightmare Respondents] & " of " & [Responses]
+			    & " respondents (" & FORMAT ( [Data Nightmare %], "0.0%" ) & "), the most common answer."
+		displayFolder: Anatomy of Fear\6 Accessibility
+		lineageTag: a5a70700-eb8d-4e0f-b64d-22304366d570
+
+	/// Alt text for the persistence hero number.
+	measure 'Alt Persistent' =
+			[Persistent Fear Respondents] & " of " & [Responses] & " respondents, " & FORMAT ( [Persistent Fear %], "0.0%" )
+			    & ", named at least one identical fear as a child and as an adult."
+		displayFolder: Anatomy of Fear\6 Accessibility
+		lineageTag: 0b6d8845-92ae-4b7f-9036-40cd132ab03c
+
+	/// Decorative animated ghost for the HTML Content visual (static SVG + CSS, no script).
+	measure 'HTML Ghost' = "<style>.fg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}.fg svg{width:88%;height:auto;filter:drop-shadow(0 0 16px rgba(189,154,247,.55));animation:fgfloat 7s ease-in-out infinite}.fg .eye{animation:fgblink 6s infinite;transform-origin:center;transform-box:fill-box}.fg .flame{animation:fgflick 1.8s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}@keyframes fgfloat{0%,100%{transform:translateY(4px)}50%{transform:translateY(-10px)}}@keyframes fgblink{0%,90%,100%{transform:scaleY(1)}93%{transform:scaleY(.08)}96%{transform:scaleY(1)}}@keyframes fgflick{0%,100%{transform:scale(1,1);opacity:1}50%{transform:scale(.88,1.12);opacity:.85}}@media (prefers-reduced-motion: reduce){.fg svg,.fg .eye,.fg .flame{animation:none}}</style><div class='fg'><svg viewBox='0 0 220 260' aria-hidden='true' focusable='false'><defs><linearGradient id='fgb' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#F4EBDD' stop-opacity='.92'/><stop offset='.55' stop-color='#D9CDE8' stop-opacity='.62'/><stop offset='1' stop-color='#BD9AF7' stop-opacity='0'/></linearGradient><radialGradient id='fgf' cx='.5' cy='.6' r='.5'><stop offset='0' stop-color='#FFF3D6'/><stop offset='.55' stop-color='#FFB886'/><stop offset='1' stop-color='#FF858E' stop-opacity='0'/></radialGradient></defs><path d='M112 18 C74 18 56 50 54 92 C51 138 44 176 24 218 C42 212 54 222 64 240 C74 226 86 228 98 244 C108 230 120 230 130 244 C140 230 152 228 164 238 C172 206 176 166 172 118 C168 58 150 18 112 18 Z' fill='url(#fgb)'/><path d='M60 150 C70 170 66 196 50 214' stroke='#F4EBDD' stroke-opacity='.25' stroke-width='3' fill='none'/><path d='M150 112 C158 150 160 188 154 226' stroke='#BD9AF7' stroke-opacity='.30' stroke-width='3' fill='none'/><ellipse class='eye' cx='95' cy='88' rx='7' ry='12' fill='#151020' transform='rotate(-8 95 88)'/><ellipse class='eye' cx='129' cy='88' rx='7' ry='12' fill='#151020' transform='rotate(8 129 88)'/><path d='M168 132 C182 136 190 144 194 154' stroke='#E3D8EC' stroke-width='9' fill='none' stroke-linecap='round' opacity='.75'/><rect x='189' y='154' width='12' height='30' rx='2' fill='#F4EBDD'/><path d='M195 154 L195 149' stroke='#151020' stroke-width='2'/><ellipse cx='195' cy='150' rx='24' ry='26' fill='url(#fgf)' opacity='.35'/><path class='flame' d='M195 132 C201 140 202 145 195 150 C188 145 189 140 195 132 Z' fill='url(#fgf)'/></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: 20d1a02e-eaed-4e30-85ee-068ebc3c50df
+
+	/// Data nightmare card for the HTML Content visual; numbers come from measures.
+	measure 'HTML Data Nightmare' =
+			"<style>.nm{font-family:'Segoe UI',sans-serif;color:#F4EBDD;display:flex;gap:14px;align-items:center;height:100%;padding:10px 16px;box-sizing:border-box;border:1px solid #6B5590;border-radius:16px;background:linear-gradient(160deg,#2A1B37 0%,#1A1124 100%);box-shadow:inset 0 0 28px rgba(255,133,142,.14)}.nm .ic{flex:0 0 104px}.nm .num{font-family:Georgia,serif;font-size:62px;line-height:.95;color:#FF858E;letter-spacing:-1px}.nm .of{font-size:14px;font-weight:600;margin-top:2px}.nm .q{font-family:Georgia,serif;font-style:italic;font-size:19px;margin:5px 0 1px;color:#F4EBDD}.nm .d{font-size:12.5px;line-height:1.25;color:#C9B8E0}.nm .err{animation:nmflick 3.4s infinite}.nm .drip{animation:nmdrip 4s ease-in infinite}@keyframes nmflick{0%,46%,54%,100%{opacity:1}50%{opacity:.25}}@keyframes nmdrip{0%{transform:translateY(0);opacity:1}80%{transform:translateY(16px);opacity:1}100%{transform:translateY(20px);opacity:0}}@media (prefers-reduced-motion: reduce){.nm .err,.nm .drip{animation:none}}</style><div class='nm'><svg class='ic' width='104' height='132' viewBox='0 0 118 150' aria-hidden='true' focusable='false'><rect x='6' y='14' width='106' height='122' rx='6' fill='#151020' stroke='#BD9AF7' stroke-width='2'/><rect x='6' y='14' width='106' height='20' rx='6' fill='#FF858E'/><path d='M20 34 C20 44 26 44 26 34 Z M52 34 C52 50 60 50 60 34 Z M88 34 C88 41 93 41 93 34 Z' fill='#FF858E'/><circle class='drip' cx='23' cy='42' r='3' fill='#FF858E'/><g stroke='#5A4775' stroke-width='1'><line x1='6' y1='60' x2='112' y2='60'/><line x1='6' y1='85' x2='112' y2='85'/><line x1='6' y1='110' x2='112' y2='110'/><line x1='42' y1='34' x2='42' y2='136'/><line x1='77' y1='34' x2='77' y2='136'/></g><rect x='12' y='44' width='24' height='7' rx='3' fill='#F4EBDD'/><rect x='83' y='44' width='22' height='7' rx='3' fill='#F4EBDD'/><rect class='err' x='47' y='40' width='25' height='15' rx='2' fill='none' stroke='#FF858E' stroke-width='1.6' stroke-dasharray='3 2'/><rect x='12' y='69' width='24' height='7' rx='3' fill='#B4F2C4'/><rect x='50' y='66' width='22' height='7' rx='3' fill='#B4F2C4' opacity='.45'/><rect x='47' y='70' width='24' height='7' rx='3' fill='#B4F2C4'/><rect x='83' y='69' width='24' height='7' rx='3' fill='#B4F2C4'/><rect x='12' y='94' width='12' height='7' rx='3' fill='#FFB886'/><rect x='55' y='94' width='17' height='7' rx='3' fill='#FFB886'/><g fill='#FFB886'><circle cx='87' cy='97.5' r='2.4'/><circle cx='94' cy='97.5' r='2.4'/><circle cx='101' cy='97.5' r='2.4'/></g><path d='M10 124 L28 116 L40 128 L58 114 L72 127 L90 117 L108 126' fill='none' stroke='#FF858E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><line x1='100' y1='0' x2='100' y2='16' stroke='#C9B8E0' stroke-width='1'/><g fill='#151020' stroke='#C9B8E0' stroke-width='1'><ellipse cx='100' cy='9' rx='4' ry='3.4'/></g></svg><div><div class='num'>"
+			    & FORMAT ( [Data Nightmare Respondents], "#,0" )
+			    & "</div><div class='of'>of "
+			    & FORMAT ( [Responses], "#,0" )
+			    & " respondents &#183; "
+			    & FORMAT ( [Data Nightmare %], "0.0%" )
+			    & "</div><div class='q'>&#8220;"
+			    & [Top Data Nightmare]
+			    & "&#8221;</div><div class='d'>"
+			    & [Top Data Nightmare Detail]
+			    & "</div></div></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: 72aca63a-0f6c-473a-bf1c-beacd62bc70e
+
+	/// Hovered fear (tooltip page).
+	measure 'TT Fear Name' = SELECTEDVALUE ( DimFear[Fear], "Several fears" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: eb90cdfd-3c6e-4d4b-bab4-379fe4c65576
+
+	/// Survey category of the hovered fear.
+	measure 'TT Fear Category' = "Survey category:  " & SELECTEDVALUE ( DimFear[Category], "-" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 51023a4f-1ede-4d70-a366-2bd4b6d185fb
+
+	/// Respondents and share, childhood list.
+	measure 'TT Childhood Text' = FORMAT ( COALESCE ( [Childhood Respondents], 0 ), "0" ) & "   " & UNICHAR ( 183 ) & "   " & FORMAT ( COALESCE ( [Childhood Fear Share], 0 ), "0.0%" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: fd233029-dda3-4834-8e58-e17466393128
+
+	/// Respondents and share, current list.
+	measure 'TT Now Text' = FORMAT ( COALESCE ( [Now Respondents], 0 ), "0" ) & "   " & UNICHAR ( 183 ) & "   " & FORMAT ( COALESCE ( [Now Fear Share], 0 ), "0.0%" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: ac1999b2-7912-4290-8b85-99f7ec56e49e
+
+	/// Same respondents in both lists, out of childhood respondents.
+	measure 'TT Kept Text' = FORMAT ( COALESCE ( [Kept Respondents], 0 ), "0" ) & " of " & FORMAT ( COALESCE ( [Childhood Respondents], 0 ), "0" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 155bedc7-9873-4aa9-b7a0-36cdd24c89bf
+
+	/// Respondents with at least one identical fear (for the age-group tooltip chart).
+	measure 'TT Persist Count' = [Persistent Fear Respondents]
+		formatString: #,0
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 6305b2dd-1c93-4143-93ba-4a6814f9ce17
+
+	/// Respondents in the group (for the age-group tooltip chart).
+	measure 'TT Persist Size' = [Responses]
+		formatString: #,0
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 0afa6e68-2415-4617-aa82-cad34d7a9a4a
+
+	/// Hovered data nightmare.
+	measure 'TT Nightmare Name' = SELECTEDVALUE ( Respondent[Nightmare], "All data nightmares" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 640fd4d4-726c-415c-b8cb-c4cea46a9297
+
+	/// Bracketed detail of the hovered data nightmare.
+	measure 'TT Nightmare Detail' = SELECTEDVALUE ( Respondent[NightmareDetail], "" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 0a09f54d-8900-4b63-abc2-94cbdd2be787
+
+	/// Respondents choosing the hovered nightmare, of all respondents.
+	measure 'TT Nightmare Text' = FORMAT ( [Responses], "0" ) & " of " & FORMAT ( CALCULATE ( [Responses], REMOVEFILTERS ( Respondent ) ), "0" ) & " respondents   " & UNICHAR ( 183 ) & "   " & FORMAT ( [Nightmare Share], "0.0%" )
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: c22cf5a0-1092-4804-86fd-1ae2b5edc5a5
+
+	/// Respondents in the age group choosing the hovered nightmare.
+	measure 'TT NM Count' = [Responses]
+		formatString: #,0
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 70a6a81b-fc17-4b8a-bffa-b123d4134664
+
+	/// All respondents in the age group, regardless of nightmare.
+	measure 'TT NM Size' = CALCULATE ( [Responses], REMOVEFILTERS ( Respondent[Nightmare], Respondent[NightmareDetail], Respondent[dataNightmare] ) )
+		formatString: #,0
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: cdd8ffd8-a5cf-4d55-9718-9e86f2ca73bb
+
+	/// Alt text for the ghost case-file tooltip.
+	measure 'HTML TT Ghost Alt' =
+			VAR _rk = SELECTEDVALUE ( Respondent[ResponseKey] )
+			RETURN "Case file for response " & _rk & ": " & SELECTEDVALUE ( Respondent[FearsKept] ) & " identical fear(s) - " & SELECTEDVALUE ( Respondent[KeptFears] ) & ". Age group " & SELECTEDVALUE ( Respondent[AgeGroup] ) & ". Worst data nightmare: " & SELECTEDVALUE ( Respondent[Nightmare] ) & "."
+		displayFolder: Anatomy of Fear\8 Tooltips
+		lineageTag: 59a7e956-fb5a-4db0-ba72-4a1997e28bf2
+
+	/// Tooltip animation: blinking eyes in the dark (decorative).
+	measure 'HTML TT Eyes' = "<style>.ey{width:100%;height:100%;display:flex;align-items:center;justify-content:center}.ey svg{width:92%;height:auto}.ey .lid{animation:eyblink 4.2s infinite;transform-origin:center;transform-box:fill-box}.ey .pu{animation:eylook 5s ease-in-out infinite}.ey .glow{animation:eyglow 3s ease-in-out infinite}@keyframes eyblink{0%,44%,50%,100%{transform:scaleY(1)}47%{transform:scaleY(.05)}}@keyframes eylook{0%,20%{transform:translateX(0)}30%,45%{transform:translateX(-4px)}60%,75%{transform:translateX(4px)}90%,100%{transform:translateX(0)}}@keyframes eyglow{0%,100%{opacity:.35}50%{opacity:.7}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='ey'><svg viewBox='0 0 80 52' aria-hidden='true' focusable='false'><ellipse class='glow' cx='40' cy='26' rx='38' ry='20' fill='#FFB886' opacity='.4' style='filter:blur(8px)'/><g class='lid'><ellipse cx='24' cy='26' rx='12' ry='8' fill='#FFE7C2'/><ellipse cx='56' cy='26' rx='12' ry='8' fill='#FFE7C2'/><g class='pu'><circle cx='24' cy='26' r='4.2' fill='#151020'/><circle cx='56' cy='26' r='4.2' fill='#151020'/><circle cx='25.5' cy='24.5' r='1.2' fill='#F4EBDD'/><circle cx='57.5' cy='24.5' r='1.2' fill='#F4EBDD'/></g></g></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: 70d1cd48-3a71-4ec7-a9c2-058d21d44387
+
+	/// Tooltip animation: spider dropping on its thread (decorative).
+	measure 'HTML TT Spider' = "<style>.sp{width:100%;height:100%;overflow:hidden;position:relative}.sp svg{width:100%;height:100%}.sp .bob{animation:spdrop 4.5s ease-in-out infinite;transform-origin:40px 0}.sp .leg{animation:spwig .5s ease-in-out infinite alternate;transform-origin:center;transform-box:fill-box}.sp .eye{animation:spblink 3s infinite}@keyframes spdrop{0%{transform:translateY(-26px) rotate(0)}35%{transform:translateY(4px) rotate(6deg)}55%{transform:translateY(0) rotate(-6deg)}75%{transform:translateY(3px) rotate(3deg)}100%{transform:translateY(-26px) rotate(0)}}@keyframes spwig{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}@keyframes spblink{0%,90%,100%{opacity:1}94%{opacity:.1}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='sp'><svg viewBox='0 0 80 80' aria-hidden='true' focusable='false'><g class='bob'><line x1='40' y1='0' x2='40' y2='44' stroke='#C9B8E0' stroke-width='1'/><g class='leg' stroke='#BD9AF7' stroke-width='2' fill='none' stroke-linecap='round'><path d='M34 50 L22 42 L16 48'/><path d='M34 53 L20 52 L14 58'/><path d='M34 56 L22 62 L18 70'/><path d='M35 58 L28 68 L26 76'/><path d='M46 50 L58 42 L64 48'/><path d='M46 53 L60 52 L66 58'/><path d='M46 56 L58 62 L62 70'/><path d='M45 58 L52 68 L54 76'/></g><ellipse cx='40' cy='54' rx='9' ry='10' fill='#24172F' stroke='#BD9AF7' stroke-width='1.5'/><circle cx='40' cy='44' r='6' fill='#24172F' stroke='#BD9AF7' stroke-width='1.5'/><g class='eye' fill='#FF858E'><circle cx='37.6' cy='43.5' r='1.6'/><circle cx='42.4' cy='43.5' r='1.6'/></g><path d='M36 57 L44 57 M38 53 L42 53' stroke='#FF858E' stroke-width='1.2'/></g></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: 5f39874f-8a81-41c5-ae7b-c25afe94663f
+
+	/// Tooltip animation: ghost peeking from a STILL HERE tombstone (decorative).
+	measure 'HTML TT Tomb' = "<style>.tb{width:100%;height:100%;overflow:hidden}.tb svg{width:100%;height:100%}.tb .gh{animation:tbpeek 4s ease-in-out infinite}.tb .arm{animation:tbwave .6s ease-in-out infinite alternate;transform-origin:62px 30px}.tb .fog{animation:tbfog 6s ease-in-out infinite}@keyframes tbpeek{0%,15%{transform:translateY(30px)}35%,70%{transform:translateY(0)}90%,100%{transform:translateY(30px)}}@keyframes tbwave{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}@keyframes tbfog{0%,100%{transform:translateX(-6px);opacity:.35}50%{transform:translateX(6px);opacity:.6}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='tb'><svg viewBox='0 0 90 70' aria-hidden='true' focusable='false'><g class='gh'><path d='M30 60 L30 26 C30 10 60 10 60 26 L60 60 Z' fill='#B4F2C4'/><circle cx='40' cy='26' r='3' fill='#151020'/><circle cx='50' cy='26' r='3' fill='#151020'/><ellipse cx='45' cy='35' rx='3' ry='4' fill='#151020'/><path class='arm' d='M60 34 C66 30 68 26 70 20' stroke='#B4F2C4' stroke-width='5' fill='none' stroke-linecap='round'/></g><path d='M18 70 L18 44 C18 30 72 30 72 44 L72 70 Z' fill='#3A2D4B' stroke='#5A4775' stroke-width='1.5'/><text x='45' y='53' text-anchor='middle' font-family='Georgia' font-size='8' fill='#F4EBDD'>STILL</text><text x='45' y='63' text-anchor='middle' font-family='Georgia' font-size='8' fill='#F4EBDD'>HERE</text><ellipse class='fog' cx='45' cy='68' rx='42' ry='5' fill='#BD9AF7' opacity='.4'/></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: d337f6f6-79ed-4053-a48e-cc704990d61e
+
+	/// Tooltip animation: flickering candle (decorative).
+	measure 'HTML TT Candle' = "<style>.cd{width:100%;height:100%;display:flex;align-items:flex-end;justify-content:center}.cd svg{width:70%;height:auto}.cd .fl{animation:cdflick 1.3s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}.cd .halo{animation:cdhalo 2.6s ease-in-out infinite}.cd .drip{animation:cddrip 5s ease-in infinite}@keyframes cdflick{0%,100%{transform:scale(1,1) skewX(0)}30%{transform:scale(.9,1.12) skewX(4deg)}60%{transform:scale(1.05,.92) skewX(-4deg)}}@keyframes cdhalo{0%,100%{opacity:.25}50%{opacity:.5}}@keyframes cddrip{0%,60%{transform:translateY(0)}100%{transform:translateY(14px)}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='cd'><svg viewBox='0 0 50 70' aria-hidden='true' focusable='false'><circle class='halo' cx='25' cy='20' r='18' fill='#FFB886'/><path class='fl' d='M25 6 C31 15 31 21 25 26 C19 21 19 15 25 6 Z' fill='#FFB886'/><path d='M25 14 C27 18 27 21 25 23 C23 21 23 18 25 14 Z' fill='#FFF3D6'/><line x1='25' y1='26' x2='25' y2='31' stroke='#151020' stroke-width='1.5'/><rect x='16' y='30' width='18' height='36' rx='2' fill='#F4EBDD'/><path class='drip' d='M19 30 L19 38 C19 41 22 41 22 38 L22 30 Z' fill='#F4EBDD'/></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: 3e157d9f-6370-4d9e-92e8-f50a3660e0ef
+
+	/// Tooltip animation: haunted spreadsheet with a blinking eye (decorative).
+	measure 'HTML TT Sheet' = "<style>.hs{width:100%;height:100%;display:flex;align-items:center;justify-content:center}.hs svg{width:94%;height:auto}.hs .lid{animation:hsopen 3.6s infinite;transform-origin:center;transform-box:fill-box}.hs .pu{animation:hslook 3.6s ease-in-out infinite}.hs .rowshake{animation:hsshake 2.4s infinite}@keyframes hsopen{0%,25%{transform:scaleY(.08)}35%,80%{transform:scaleY(1)}90%,100%{transform:scaleY(.08)}}@keyframes hslook{0%,40%{transform:translateX(0)}55%{transform:translateX(-2px)}70%{transform:translateX(2px)}100%{transform:translateX(0)}}@keyframes hsshake{0%,88%,100%{transform:translateX(0)}91%{transform:translateX(-2px)}94%{transform:translateX(2px)}97%{transform:translateX(-1px)}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='hs'><svg viewBox='0 0 80 60' aria-hidden='true' focusable='false'><rect x='4' y='6' width='72' height='50' rx='4' fill='#151020' stroke='#BD9AF7' stroke-width='1.6'/><rect x='4' y='6' width='72' height='11' rx='4' fill='#FF858E'/><g stroke='#5A4775' stroke-width='1'><line x1='4' y1='30' x2='76' y2='30'/><line x1='4' y1='43' x2='76' y2='43'/><line x1='28' y1='17' x2='28' y2='56'/><line x1='52' y1='17' x2='52' y2='56'/></g><g class='rowshake'><rect x='9' y='21' width='14' height='5' rx='2' fill='#F4EBDD'/><rect x='57' y='21' width='14' height='5' rx='2' fill='#F4EBDD'/></g><g class='lid'><ellipse cx='40' cy='23.5' rx='9' ry='5' fill='#FFE7C2'/><circle class='pu' cx='40' cy='23.5' r='2.6' fill='#151020'/></g><rect x='9' y='34' width='14' height='5' rx='2' fill='#B4F2C4'/><rect x='33' y='34' width='14' height='5' rx='2' fill='#B4F2C4'/><rect x='57' y='34' width='14' height='5' rx='2' fill='#B4F2C4' opacity='.5'/><rect x='9' y='47' width='7' height='5' rx='2' fill='#FFB886'/><rect x='40' y='47' width='7' height='5' rx='2' fill='#FFB886'/><circle cx='61' cy='49.5' r='1.6' fill='#FFB886'/><circle cx='66' cy='49.5' r='1.6' fill='#FFB886'/></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: 94dc8d1a-9f6f-45d5-8382-dc6b67aad83f
+
+	/// Tooltip animation: bat flying across (decorative).
+	measure 'HTML TT Bat' = "<style>.bt{width:100%;height:100%;overflow:hidden;position:relative}.bt svg{position:absolute;top:30%;left:0;width:46%;height:auto;animation:btfly 4.8s linear infinite}.bt .w{animation:btflap .22s ease-in-out infinite alternate;transform-origin:50% 50%;transform-box:fill-box}@keyframes btfly{0%{transform:translate(-110%,10px)}25%{transform:translate(20%,-8px)}50%{transform:translate(70%,12px)}75%{transform:translate(130%,-6px)}100%{transform:translate(230%,8px)}}@keyframes btflap{from{transform:scaleY(1)}to{transform:scaleY(.35)}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='bt'><svg viewBox='0 0 40 20' aria-hidden='true' focusable='false'><g class='w'><path d='M20 10 C16 4 10 2 2 4 C6 7 7 10 5 14 C9 12 13 12 15 15 C16 12 18 11 20 12 C22 11 24 12 25 15 C27 12 31 12 35 14 C33 10 34 7 38 4 C30 2 24 4 20 10 Z' fill='#BD9AF7'/></g><circle cx='18.5' cy='9.5' r='.9' fill='#FF858E'/><circle cx='21.5' cy='9.5' r='.9' fill='#FF858E'/></svg></div>"
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: a8a7507f-329d-4310-8cce-3fd8e4d44dfd
+
+	/// Tooltip case file for one respondent (hovered ghost): childhood and current fears, identical fears highlighted, age group and data nightmare. Values from the model.
+	measure 'HTML TT Ghost Case File' =
+			VAR _rk = SELECTEDVALUE ( Respondent[ResponseKey] )
+			VAR _keptN = SELECTEDVALUE ( Respondent[FearsKept] )
+			VAR _kept = FORMAT ( _keptN, "0" )
+			VAR _age = SELECTEDVALUE ( Respondent[AgeGroup] )
+			VAR _nm = SELECTEDVALUE ( Respondent[Nightmare] )
+			VAR _title = IF ( _keptN > 0, "Still haunted by " & _keptN & IF ( _keptN = 1, " old fear", " old fears" ), "Escaped every childhood fear" )
+			VAR _fill = IF ( _keptN > 0, "#B4F2C4", "none" )
+			VAR _dash = IF ( _keptN > 0, "0", "5 4" )
+			VAR _glow = IF ( _keptN > 0, "8", "0" )
+			VAR _eye = IF ( _keptN > 0, "#151020", "#9A86B5" )
+			VAR _explain = IF ( _keptN > 0, "&#10022; = the very same answer in both lists: a monster that grew up with them.", "None of the childhood answers appears in today&#8217;s list: these monsters stayed under the bed." )
+			VAR _child = CONCATENATEX (
+			        CALCULATETABLE (
+			            SUMMARIZE ( FactFearSelection, DimFear[Fear], FactFearSelection[IsRetained] ),
+			            FactFearSelection[LifeStage] = "Childhood"
+			        ),
+			        IF ( FactFearSelection[IsRetained], "<li class='k'>", "<li>" ) & DimFear[Fear] & "</li>",
+			        "",
+			        FactFearSelection[IsRetained], DESC, DimFear[Fear], ASC
+			    )
+			VAR _now = CONCATENATEX (
+			        CALCULATETABLE (
+			            SUMMARIZE ( FactFearSelection, DimFear[Fear], FactFearSelection[IsRetained] ),
+			            FactFearSelection[LifeStage] = "Adult"
+			        ),
+			        IF ( FactFearSelection[IsRetained], "<li class='k'>", "<li>" ) & DimFear[Fear] & "</li>",
+			        "",
+			        FactFearSelection[IsRetained], DESC, DimFear[Fear], ASC
+			    )
+			RETURN
+			    IF (
+			        ISBLANK ( _rk ),
+			        "<div style='font-family:Segoe UI;color:#C9B8E0;padding:20px'>Hover a single ghost to open its case file.</div>",
+			        "<style>.gc{font-family:'Segoe UI',sans-serif;color:#F4EBDD;height:100%;box-sizing:border-box;padding:10px 14px 8px;position:relative;overflow:hidden;background:radial-gradient(circle at 88% 6%,rgba(189,154,247,.28),rgba(30,20,43,0) 42%),#1E142B}.gc .hd{display:flex;gap:12px;align-items:center}.gc .gs{flex:0 0 74px;height:86px}.gc .gs svg{width:74px;height:86px;animation:gcfloat 3.8s ease-in-out infinite}.gc .eye{animation:gcblink 4s infinite;transform-origin:center;transform-box:fill-box}.gc .kick{font-size:10px;letter-spacing:1.6px;color:#BD9AF7;font-weight:700}.gc .ttl{font-family:Georgia,serif;font-size:21px;line-height:1.15;margin:2px 0}.gc .sub{font-size:11px;color:#C9B8E0}.gc .cols{display:flex;gap:12px;margin-top:8px}.gc .col{flex:1;border-top:1px solid #4A3860;padding-top:5px}.gc .h{font-size:10px;font-weight:700;letter-spacing:1.4px;margin-bottom:3px}.gc .then{color:#BD9AF7}.gc .now{color:#FFB886}.gc ul{list-style:none;margin:0;padding:0}.gc li{font-size:12px;line-height:1.5;color:#F4EBDD}.gc li.k{color:#151020;background:#B4F2C4;border-radius:4px;padding:0 5px;margin:1px 0;font-weight:700;animation:gcpulse 2.8s ease-in-out infinite}.gc li.k:before{content:'\2726  '}.gc .lg{margin-top:8px;font-size:11px;color:#B4F2C4;font-style:italic}.gc .ft{margin-top:6px;font-size:11px;color:#C9B8E0;border-top:1px dashed #4A3860;padding-top:5px}.gc .ft b{color:#FF858E;font-family:Georgia,serif;font-style:italic;font-weight:400;font-size:13px}.gc .bat{position:absolute;top:8px;right:-40px;width:34px;animation:gcbat 7s linear infinite}.gc .bat .w{animation:gcflap .22s ease-in-out infinite alternate;transform-origin:50% 50%;transform-box:fill-box}@keyframes gcfloat{0%,100%{transform:translateY(3px)}50%{transform:translateY(-6px)}}@keyframes gcblink{0%,90%,100%{transform:scaleY(1)}94%{transform:scaleY(.1)}}@keyframes gcpulse{0%,100%{box-shadow:0 0 0 rgba(180,242,196,0)}50%{box-shadow:0 0 10px rgba(180,242,196,.65)}}@keyframes gcbat{0%,55%{transform:translate(0,0)}75%{transform:translate(-260px,18px)}100%{transform:translate(-520px,-4px)}}@keyframes gcflap{from{transform:scaleY(1)}to{transform:scaleY(.35)}}@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style><div class='gc'><svg class='bat' viewBox='0 0 40 20' aria-hidden='true'><g class='w'><path d='M20 10 C16 4 10 2 2 4 C6 7 7 10 5 14 C9 12 13 12 15 15 C16 12 18 11 20 12 C22 11 24 12 25 15 C27 12 31 12 35 14 C33 10 34 7 38 4 C30 2 24 4 20 10 Z' fill='#BD9AF7'/></g></svg><div class='hd'><div class='gs'><svg viewBox='0 0 74 86' aria-hidden='true'><path d='M10 82 L10 34 C10 6 64 6 64 34 L64 82 L55 74 L46 82 L37 74 L28 82 L19 74 Z' fill='"
+			    & _fill
+			    & "' stroke='#B4F2C4' stroke-width='2.5' stroke-dasharray='"
+			    & _dash
+			    & "' style='filter:drop-shadow(0 0 "
+			    & _glow
+			    & "px #B4F2C4)'/><ellipse class='eye' cx='28' cy='38' rx='5' ry='7' fill='"
+			    & _eye
+			    & "'/><ellipse class='eye' cx='46' cy='38' rx='5' ry='7' fill='"
+			    & _eye
+			    & "'/><ellipse cx='37' cy='54' rx='4' ry='5.5' fill='"
+			    & _eye
+			    & "'/></svg></div><div><div class='kick'>CASE FILE &#183; RESPONSE #"
+			    & _rk
+			    & "</div><div class='ttl'>"
+			    & _title
+			    & "</div><div class='sub'>Age group "
+			    & _age
+			    & " (when answering) &#183; "
+			    & _kept
+			    & " identical fear(s)</div></div></div><div class='cols'><div class='col'><div class='h then'>&#9664; THEN &#183; AS A CHILD</div><ul>"
+			    & _child
+			    & "</ul></div><div class='col'><div class='h now'>NOW &#183; TODAY &#9654;</div><ul>"
+			    & _now
+			    & "</ul></div></div><div class='lg'>"
+			    & _explain
+			    & "</div><div class='ft'>Worst data nightmare: <b>&#8220;"
+			    & _nm
+			    & "&#8221;</b></div></div>"
+			    )
+		displayFolder: Anatomy of Fear\7 HTML
+		lineageTag: c2c9eb91-3ca0-4c28-83e1-fdd70826134a
+
+	column Column1
+		dataType: string
+		isHidden
+		lineageTag: b77a1dc6-72ce-4906-9885-b3c35fc37fda
+		summarizeBy: none
+		sourceColumn: Column1
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Measures = m
+		mode: import
+		source =
+				let
+				    Source = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i44FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [Column1 = _t]),
+				    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,231 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.13.0/schema.json",
+  "name": "86c9f5ebbcf4f0c2b0f5",
+  "position": {
+    "x": 12,
+    "y": 238,
+    "z": 5000,
+    "height": 136,
+    "width": 416,
+    "tabOrder": 6000
+  },
+  "visual": {
+    "visualType": "deneb7E15AEF80B9E4D4F8E12924291ECE89A",
+    "query": {
+      "queryState": {
+        "dataset": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Respondent"
+                    }
+                  },
+                  "Property": "AgeGroup"
+                }
+              },
+              "queryRef": "Respondent.AgeGroup",
+              "nativeQueryRef": "AgeGroup"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "TT Persist Count"
+                }
+              },
+              "queryRef": "_Measures.TT Persist Count",
+              "nativeQueryRef": "TT Persist Count"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Measures"
+                    }
+                  },
+                  "Property": "TT Persist Size"
+                }
+              },
+              "queryRef": "_Measures.TT Persist Size",
+              "nativeQueryRef": "TT Persist Size"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "vega": [
+        {
+          "properties": {
+            "provider": {
+              "expr": {
+                "Literal": {
+                  "Value": "'vegaLite'"
+                }
+              }
+            },
+            "jsonSpec": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v5.json\",\n  \"description\": \"Tooltip: by age group (age when answering), share of respondents (left measure) with count of group (label).\",\n  \"data\": {\n    \"name\": \"dataset\"\n  },\n  \"width\": \"container\",\n  \"height\": \"container\",\n  \"autosize\": {\n    \"type\": \"fit\",\n    \"contains\": \"padding\"\n  },\n  \"padding\": {\n    \"left\": 2,\n    \"right\": 8,\n    \"top\": 2,\n    \"bottom\": 2\n  },\n  \"background\": \"transparent\",\n  \"config\": {\n    \"view\": {\n      \"stroke\": null\n    },\n    \"font\": \"Segoe UI\"\n  },\n  \"params\": [\n    {\n      \"name\": \"barColor\",\n      \"value\": \"#B4F2C4\"\n    }\n  ],\n  \"transform\": [\n    {\n      \"calculate\": \"datum[''TT Persist Count''] ? datum[''TT Persist Count''] : 0\",\n      \"as\": \"k\"\n    },\n    {\n      \"calculate\": \"datum[''TT Persist Size''] ? datum[''TT Persist Size''] : 0\",\n      \"as\": \"g\"\n    },\n    {\n      \"calculate\": \"datum.g > 0 ? datum.k / datum.g : 0\",\n      \"as\": \"share\"\n    },\n    {\n      \"calculate\": \"format(datum.share, ''.0%'') + ''  ·  '' + datum.k + '' of '' + datum.g\",\n      \"as\": \"lbl\"\n    }\n  ],\n  \"encoding\": {\n    \"y\": {\n      \"field\": \"AgeGroup\",\n      \"type\": \"ordinal\",\n      \"sort\": \"ascending\",\n      \"axis\": {\n        \"title\": null,\n        \"domain\": false,\n        \"ticks\": false,\n        \"labelColor\": \"#F4EBDD\",\n        \"labelFontSize\": 12,\n        \"labelPadding\": 6\n      }\n    }\n  },\n  \"layer\": [\n    {\n      \"mark\": {\n        \"type\": \"bar\",\n        \"color\": {\n          \"expr\": \"barColor\"\n        },\n        \"cornerRadiusEnd\": 2,\n        \"height\": {\n          \"band\": 0.7\n        }\n      },\n      \"encoding\": {\n        \"x\": {\n          \"field\": \"share\",\n          \"type\": \"quantitative\",\n          \"axis\": null,\n          \"scale\": {\n            \"domain\": [\n              0,\n              1.45\n            ],\n            \"nice\": false\n          }\n        }\n      }\n    },\n    {\n      \"mark\": {\n        \"type\": \"text\",\n        \"align\": \"left\",\n        \"baseline\": \"middle\",\n        \"dx\": 5,\n        \"fontSize\": 11.5,\n        \"fontWeight\": 600,\n        \"color\": \"#F4EBDD\"\n      },\n      \"encoding\": {\n        \"x\": {\n          \"field\": \"share\",\n          \"type\": \"quantitative\"\n        },\n        \"text\": {\n          \"field\": \"lbl\"\n        }\n      }\n    }\n  ]\n}'"
+                }
+              }
+            },
+            "jsonConfig": {
+              "expr": {
+                "Literal": {
+                  "Value": "'{}'"
+                }
+              }
+            },
+            "renderMode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'svg'"
+                }
+              }
+            },
+            "enableTooltips": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableContextMenu": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "enableSelection": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "enableHighlight": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "visualHeader": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "dropShadow": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "padding": [
+        {
+          "properties": {
+            "top": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "bottom": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "left": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            },
+            "right": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

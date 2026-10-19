@@ -1,0 +1,107 @@
+{
+  "name": "AnatomyOfFear",
+  "dataColors": [
+    "#8463BF",
+    "#B8622F",
+    "#B4F2C4",
+    "#FF858E",
+    "#BD9AF7",
+    "#FFB886",
+    "#C9B8E0",
+    "#9A86B5"
+  ],
+  "background": "#151020",
+  "foreground": "#F4EBDD",
+  "tableAccent": "#BD9AF7",
+  "good": "#B4F2C4",
+  "neutral": "#FFB886",
+  "bad": "#FF858E",
+  "maximum": "#FF858E",
+  "center": "#FFB886",
+  "minimum": "#8463BF",
+  "textClasses": {
+    "callout": {
+      "fontFace": "Georgia",
+      "fontSize": 40,
+      "color": "#F4EBDD"
+    },
+    "title": {
+      "fontFace": "Georgia",
+      "fontSize": 16,
+      "color": "#F4EBDD"
+    },
+    "header": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 13,
+      "color": "#F4EBDD"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 11,
+      "color": "#F4EBDD"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [
+          {
+            "show": false,
+            "transparency": 100
+          }
+        ],
+        "border": [
+          {
+            "show": false
+          }
+        ],
+        "dropShadow": [
+          {
+            "show": false
+          }
+        ],
+        "visualHeader": [
+          {
+            "show": false
+          }
+        ],
+        "title": [
+          {
+            "show": false
+          }
+        ],
+        "padding": [
+          {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          }
+        ]
+      }
+    },
+    "page": {
+      "*": {
+        "outspace": [
+          {
+            "color": {
+              "solid": {
+                "color": "#0D0913"
+              }
+            }
+          }
+        ],
+        "background": [
+          {
+            "color": {
+              "solid": {
+                "color": "#151020"
+              }
+            },
+            "transparency": 0
+          }
+        ]
+      }
+    }
+  }
+}

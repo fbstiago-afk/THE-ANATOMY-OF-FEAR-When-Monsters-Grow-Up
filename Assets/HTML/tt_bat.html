@@ -1,0 +1,10 @@
+<style>
+.bt{width:100%;height:100%;overflow:hidden;position:relative}
+.bt svg{position:absolute;top:30%;left:0;width:46%;height:auto;animation:btfly 4.8s linear infinite}
+.bt .w{animation:btflap .22s ease-in-out infinite alternate;transform-origin:50% 50%;transform-box:fill-box}
+@keyframes btfly{0%{transform:translate(-110%,10px)}25%{transform:translate(20%,-8px)}50%{transform:translate(70%,12px)}75%{transform:translate(130%,-6px)}100%{transform:translate(230%,8px)}}
+@keyframes btflap{from{transform:scaleY(1)}to{transform:scaleY(.35)}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important}}</style>
+<div class='bt'><svg viewBox='0 0 40 20' aria-hidden='true' focusable='false'>
+<g class='w'><path d='M20 10 C16 4 10 2 2 4 C6 7 7 10 5 14 C9 12 13 12 15 15 C16 12 18 11 20 12 C22 11 24 12 25 15 C27 12 31 12 35 14 C33 10 34 7 38 4 C30 2 24 4 20 10 Z' fill='#BD9AF7'/></g>
+<circle cx='18.5' cy='9.5' r='.9' fill='#FF858E'/><circle cx='21.5' cy='9.5' r='.9' fill='#FF858E'/></svg></div>

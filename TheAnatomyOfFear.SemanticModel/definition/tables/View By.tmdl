@@ -1,0 +1,43 @@
+table 'View By'
+	lineageTag: 14706316-2804-4d58-86c7-17fdf02e6c8d
+
+	column 'View By Order'
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 29b0491d-9205-4180-b5c9-a82a72071f42
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+	column 'View By Fields'
+		dataType: string
+		isHidden
+		lineageTag: 58d71d84-89a4-4092-bea4-f1f0000be76a
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'View By Order'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+	column 'View By'
+		dataType: string
+		lineageTag: a65c8352-d8c0-45eb-aa16-85f94d73fe9d
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'View By Order'
+
+		relatedColumnDetails
+			groupByColumn: 'View By Fields'
+
+	partition 'View By' = calculated
+		mode: import
+		source =
+				{
+				    ("Age Group", NAMEOF('DimAgeGroup'[AgeGroup]), 0),
+				    ("Gender", NAMEOF('DimGender'[Gender]), 1)
+				}
+
